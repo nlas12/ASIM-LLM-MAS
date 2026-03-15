@@ -1,0 +1,416 @@
+"""
+Data Loader — WRDS Integration via existing WRDSDATA class
+data_loader.py
+============================================================
+"""
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
+import hashlib
+import warnings
+import math
+from typing import Optional
+
+import pandas as pd
+import numpy as np
+
+from data.wrds_data import WRDSDATA
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# Anonymization
+# ══════════════════════════════════════════════════════════════════════════════
+
+def anonymize_ticker(real_ticker: str, salt: str = "asim2526") -> str:
+    h = hashlib.sha256(f"{salt}{real_ticker}".encode()).hexdigest()[:6].upper()
+    return f"TICK_{h}"
+
+def build_ticker_map(real_tickers: list[str]) -> dict[str, str]:
+    return {t: anonymize_ticker(t) for t in real_tickers}
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# Rebalance Date Generation
+# ══════════════════════════════════════════════════════════════════════════════
+
+def generate_rebalance_dates(start_date: str, end_date: str, frequency: str = "quarterly") -> list[str]:
+    freq_map = {"quarterly": "QS", "monthly": "MS", "semi-annual": "6MS", "annual": "YS"}
+    freq = freq_map.get(frequency)
+    if freq is None:
+        raise ValueError(f"Unknown frequency '{frequency}'. Choose from: {list(freq_map.keys())}")
+    dates = pd.date_range(start_date, end_date, freq=freq)
+    return [d.strftime("%Y-%m-%d") for d in dates]
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# Core Data Fetching
+# ══════════════════════════════════════════════════════════════════════════════
+
+def _fetch_period_data(wrds, date, window_days=10):
+    market_df = wrds.get_market_data_asof(date, window_days=window_days)
+    if market_df.empty:
+        return pd.DataFrame(), {}, []
+    market_df = market_df.dropna(subset=["ticker"])
+    price_map = {}
+    if "close" in market_df.columns:
+        for _, row in market_df.iterrows():
+            if pd.notna(row.get("close")) and pd.notna(row.get("ticker")):
+                price_map[row["ticker"]] = float(row["close"])
+    ticker_list = market_df["ticker"].dropna().unique().tolist()
+    return market_df, price_map, ticker_list
+
+def _fetch_prices_only(wrds, date, ticker_map, window_days=10):
+    market_df = wrds.get_market_data_asof(date, window_days=window_days)
+    if market_df.empty:
+        return {}
+    prices = {}
+    if "close" in market_df.columns:
+        for _, row in market_df.iterrows():
+            ticker = row.get("ticker")
+            if pd.notna(ticker) and pd.notna(row.get("close")) and ticker in ticker_map:
+                prices[ticker_map[ticker]] = round(float(row["close"]), 2)
+    return prices
+
+
+def _compute_derived_ratios(row: pd.Series) -> dict:
+    """Compute derived financial ratios from a single row of Compustat + CRSP data."""
+    ratios = {}
+
+    def safe_div(num, den):
+        if den is None or den == 0 or num is None: return None
+        return num / den
+
+    def safe_float(val):
+        if pd.isna(val): return None
+        return float(val)
+
+    assets = safe_float(row.get("assets"))
+    liabilities = safe_float(row.get("liabilities"))
+    revenue = safe_float(row.get("revenue"))
+    net_income = safe_float(row.get("net_income"))
+    cash = safe_float(row.get("cash_equivalents"))
+    current_assets = safe_float(row.get("current_assets"))
+    current_liabilities = safe_float(row.get("current_liabilities"))
+    long_term_debt = safe_float(row.get("long_term_debt"))
+    shares = safe_float(row.get("shares_outstanding"))
+    close_price = safe_float(row.get("close"))
+    operating_income = safe_float(row.get("operating_income"))
+
+    equity = (assets - liabilities) if (assets and liabilities) else None
+
+    # ── Standard ratios ───────────────────────────────────────────────────
+    ratios["roe"] = safe_div(net_income, equity)
+    ratios["roa"] = safe_div(net_income, assets)
+    ratios["current_ratio"] = safe_div(current_assets, current_liabilities)
+    ratios["debt_to_equity"] = safe_div(liabilities, equity)
+    ratios["debt_ratio"] = safe_div(liabilities, assets)
+    ratios["net_income_margin"] = safe_div(net_income, revenue)
+
+    # ── Market cap & valuation ────────────────────────────────────────────
+    market_cap = None
+    if shares and close_price:
+        market_cap = shares * close_price
+        ratios["market_cap"] = market_cap
+        if net_income and net_income > 0:
+            annual_earnings = net_income * 4
+            eps = annual_earnings / shares
+            ratios["pe_ratio"] = close_price / eps if eps > 0 else None
+        else:
+            ratios["pe_ratio"] = None
+        if equity and equity > 0:
+            bvps = equity / shares
+            ratios["pb_ratio"] = close_price / bvps if bvps > 0 else None
+            ratios["book_value_per_share"] = bvps
+        else:
+            ratios["pb_ratio"] = None
+            ratios["book_value_per_share"] = None
+    else:
+        ratios["market_cap"] = None
+        ratios["pe_ratio"] = None
+        ratios["pb_ratio"] = None
+        ratios["book_value_per_share"] = None
+
+    # ── Enterprise Value ──────────────────────────────────────────────────
+    # EV = Market Cap + Total Debt - Cash
+    ev = None
+    if market_cap is not None:
+        debt = long_term_debt if long_term_debt else 0.0
+        cash_val = cash if cash else 0.0
+        ev = market_cap + debt - cash_val
+        ratios["enterprise_value"] = ev if ev > 0 else None
+    else:
+        ratios["enterprise_value"] = None
+
+    # ── Earnings Yield (Greenblatt) ───────────────────────────────────────
+    # ≈ EBIT / EV (annualized: operating_income * 4 for quarterly data)
+    if operating_income and ev and ev > 0:
+        annual_ebit = operating_income * 4
+        ratios["earnings_yield"] = annual_ebit / ev
+    else:
+        ratios["earnings_yield"] = None
+
+    # ── Return on Capital (Greenblatt, simplified) ────────────────────────
+    # ≈ EBIT / Net Working Capital (PPE not available in pipeline)
+    nwc = None
+    if current_assets is not None and current_liabilities is not None:
+        nwc = current_assets - current_liabilities
+    if operating_income and nwc and nwc > 0:
+        annual_ebit = operating_income * 4
+        ratios["return_on_capital"] = annual_ebit / nwc
+    else:
+        ratios["return_on_capital"] = None
+
+    # ── Net Current Asset Value (Graham net-nets) ─────────────────────────
+    # NCAV = Current Assets - Total Liabilities
+    if current_assets is not None and liabilities is not None:
+        ncav = current_assets - liabilities
+        ratios["ncav"] = ncav
+        if shares and shares > 0:
+            ratios["ncav_per_share"] = ncav / shares
+        else:
+            ratios["ncav_per_share"] = None
+    else:
+        ratios["ncav"] = None
+        ratios["ncav_per_share"] = None
+
+    return ratios
+
+
+def _build_period_structures(market_df, price_map, ticker_map):
+    universe = []
+    fundamentals = {}
+    prices = {}
+
+    market_caps = {}
+    for _, row in market_df.iterrows():
+        ticker = row.get("ticker")
+        if ticker is None or ticker not in ticker_map: continue
+        ratios = _compute_derived_ratios(row)
+        if ratios.get("market_cap"):
+            market_caps[ticker] = ratios["market_cap"]
+
+    sorted_by_mc = sorted(market_caps.items(), key=lambda x: x[1], reverse=True)
+    mc_ranks = {ticker: rank + 1 for rank, (ticker, _) in enumerate(sorted_by_mc)}
+
+    for _, row in market_df.iterrows():
+        real_ticker = row.get("ticker")
+        if real_ticker is None or real_ticker not in ticker_map: continue
+
+        anon = ticker_map[real_ticker]
+        ratios = _compute_derived_ratios(row)
+
+        def safe_round(val, decimals=3):
+            if val is None: return None
+            return round(val, decimals)
+
+        close_val = row.get("close")
+        close_rounded = round(float(close_val), 2) if pd.notna(close_val) else None
+
+        universe.append({
+            "ticker": anon,
+            "market_cap_rank": mc_ranks.get(real_ticker, 999),
+            "pe_ratio": safe_round(ratios.get("pe_ratio"), 1),
+            "pb_ratio": safe_round(ratios.get("pb_ratio"), 1),
+            "market_cap": safe_round(ratios.get("market_cap"), 0),
+            "roe": safe_round(ratios.get("roe"), 3),
+            "roa": safe_round(ratios.get("roa"), 3),
+            "net_income_margin": safe_round(ratios.get("net_income_margin"), 3),
+            "debt_to_equity": safe_round(ratios.get("debt_to_equity"), 2),
+            "current_ratio": safe_round(ratios.get("current_ratio"), 2),
+            "earnings_yield": safe_round(ratios.get("earnings_yield"), 3),
+            "revenue_growth_yoy": None,
+            "close": close_rounded,
+        })
+
+        fund_entry = {}
+        raw_fields = {
+            "revenue": "revenue", "net_income": "net_income",
+            "assets": "assets", "liabilities": "liabilities",
+            "cash_equivalents": "cash_equivalents",
+            "current_assets": "current_assets", "current_liabilities": "current_liabilities",
+            "long_term_debt": "long_term_debt",
+            "shares_outstanding": "shares_outstanding",
+            "operating_income": "operating_income",
+            "net_ppe": "net_ppe"
+        }
+        for fund_key, col_name in raw_fields.items():
+            val = row.get(col_name)
+            fund_entry[fund_key] = round(float(val), 2) if pd.notna(val) else None
+
+        for ohlcv_col in ["open", "high", "low", "close", "volume"]:
+            val = row.get(ohlcv_col)
+            if ohlcv_col == "volume":
+                fund_entry[ohlcv_col] = int(float(val)) if pd.notna(val) else None
+            else:
+                fund_entry[ohlcv_col] = round(float(val), 2) if pd.notna(val) else None
+
+        for ratio_name, ratio_val in ratios.items():
+            fund_entry[ratio_name] = safe_round(ratio_val, 4)
+
+        fundamentals[anon] = fund_entry
+
+        if real_ticker in price_map and price_map[real_ticker] is not None:
+            prices[anon] = round(price_map[real_ticker], 2)
+
+    universe.sort(key=lambda x: x.get("market_cap_rank", 999))
+    return universe, fundamentals, prices
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# Revenue Growth (YoY)
+# ══════════════════════════════════════════════════════════════════════════════
+
+def _enrich_revenue_growth(fundamentals_by_period, periods):
+    for i, period in enumerate(periods):
+        if i < 4: continue
+        prior_period = periods[i - 4]
+        current_funds = fundamentals_by_period.get(period, {})
+        prior_funds = fundamentals_by_period.get(prior_period, {})
+        for anon_ticker, current_data in current_funds.items():
+            prior_data = prior_funds.get(anon_ticker)
+            if prior_data is None: continue
+            curr_rev = current_data.get("revenue")
+            prior_rev = prior_data.get("revenue")
+            if curr_rev and prior_rev and prior_rev > 0:
+                current_data["revenue_growth_yoy"] = round((curr_rev - prior_rev) / prior_rev, 4)
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# Synthetic Data Fallback
+# ══════════════════════════════════════════════════════════════════════════════
+
+def _generate_synthetic_data(periods, n_stocks=50):
+    np.random.seed(42)
+    fake_tickers = [f"SYNTH_{i:03d}" for i in range(1, n_stocks + 1)]
+    ticker_map = build_ticker_map(fake_tickers)
+    universe_by_period = {}; fundamentals_by_period = {}; prices_by_period = {}
+
+    for idx, period in enumerate(periods):
+        universe = []; fundamentals = {}; prices = {}
+        for i, real_t in enumerate(fake_tickers):
+            anon = ticker_map[real_t]
+            base_price = 50 + i * 8 + idx * np.random.normal(2, 3)
+            price = max(5.0, round(base_price, 2))
+            base_rev = (1 + i) * 1e9
+            revenue = base_rev * np.random.uniform(0.9, 1.1)
+            net_income = revenue * np.random.uniform(0.05, 0.20)
+            assets = revenue * np.random.uniform(2.0, 5.0)
+            equity = assets * np.random.uniform(0.3, 0.7)
+            shares = np.random.uniform(100e6, 2000e6)
+            pe = price / (net_income * 4 / shares) if net_income > 0 else None
+            pb = price / (equity / shares) if equity > 0 else None
+
+            universe.append({
+                "ticker": anon, "market_cap_rank": i + 1,
+                "pe_ratio": round(pe, 1) if pe else None,
+                "pb_ratio": round(pb, 1) if pb else None,
+                "roe": round(net_income / equity, 3) if equity > 0 else None,
+                "debt_to_equity": round((assets - equity) / equity, 2) if equity > 0 else None,
+                "revenue_growth_yoy": round(np.random.uniform(-0.1, 0.3), 3),
+            })
+            fundamentals[anon] = {
+                "revenue": round(revenue, 2), "net_income": round(net_income, 2),
+                "assets": round(assets, 2), "liabilities": round(assets - equity, 2),
+                "shares_outstanding": round(shares, 0), "close": price,
+                "pe_ratio": round(pe, 2) if pe else None,
+                "pb_ratio": round(pb, 2) if pb else None,
+                "roe": round(net_income / equity, 4) if equity > 0 else None,
+                "roa": round(net_income / assets, 4) if assets > 0 else None,
+                "debt_to_equity": round((assets - equity) / equity, 4) if equity > 0 else None,
+                "net_income_margin": round(net_income / revenue, 4) if revenue > 0 else None,
+                "market_cap": round(price * shares, 2),
+            }
+            prices[anon] = price
+        universe_by_period[period] = universe
+        fundamentals_by_period[period] = fundamentals
+        prices_by_period[period] = prices
+    return universe_by_period, fundamentals_by_period, prices_by_period
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# Main Entry Point
+# ══════════════════════════════════════════════════════════════════════════════
+
+def prepare_backtest_data(
+    start_date="2014-01-01", end_date="2023-12-31", frequency="quarterly",
+    n_stocks=None, use_synthetic=False, wrds_window_days=10,
+):
+    rebalance_dates = generate_rebalance_dates(start_date, end_date, frequency)
+    periods = [f"Period_{i+1:03d}" for i in range(len(rebalance_dates))]
+
+    print(f"  Backtest: {start_date} -> {end_date} ({frequency})")
+    print(f"  {len(periods)} trading periods generated")
+
+    last_rebalance = pd.Timestamp(rebalance_dates[-1]) if rebalance_dates else None
+    end_ts = pd.Timestamp(end_date)
+    needs_final_valuation = last_rebalance is not None and end_ts > last_rebalance
+    if needs_final_valuation:
+        print(f"  Final valuation at {end_date} ({(end_ts - last_rebalance).days}d after last trade)")
+
+    if use_synthetic:
+        print("  Using SYNTHETIC data (no WRDS connection)")
+        universe, funds, prices = _generate_synthetic_data(periods, n_stocks or 50)
+        fake_tickers = [f"SYNTH_{i:03d}" for i in range(1, (n_stocks or 50) + 1)]
+        ticker_map = build_ticker_map(fake_tickers)
+        final_val_prices = prices.get(periods[-1], {}) if needs_final_valuation else {}
+        return periods, universe, funds, prices, ticker_map, final_val_prices
+
+    print("  Connecting to WRDS...")
+    market_universe_by_period = {}; fundamentals_by_period = {}; prices_by_period = {}
+    all_tickers = set(); period_raw_data = {}
+
+    with WRDSDATA() as wrds_conn:
+        print("  [Pass 1] Fetching data for each period...")
+        for i, (period, date) in enumerate(zip(periods, rebalance_dates)):
+            print(f"    {period} ({date})...", end=" ", flush=True)
+            market_df, price_map, ticker_list = _fetch_period_data(wrds_conn, date, window_days=wrds_window_days)
+            if market_df.empty: print("no data"); continue
+            period_raw_data[period] = (market_df, price_map, ticker_list)
+            all_tickers.update(ticker_list)
+            print(f"{len(ticker_list)} stocks")
+
+        ticker_map = build_ticker_map(sorted(all_tickers))
+
+        final_val_prices = {}
+        if needs_final_valuation:
+            print(f"    Final valuation ({end_date})...", end=" ", flush=True)
+            final_val_prices = _fetch_prices_only(wrds_conn, end_date, ticker_map, window_days=wrds_window_days)
+            print(f"{len(final_val_prices)} prices")
+
+    print(f"  Ticker map: {len(ticker_map)} unique tickers anonymized")
+    print("  [Pass 2] Building period data structures...")
+
+    for period in periods:
+        if period not in period_raw_data:
+            market_universe_by_period[period] = []; fundamentals_by_period[period] = {}; prices_by_period[period] = {}
+            continue
+        market_df, price_map, _ = period_raw_data[period]
+        universe, funds, prices = _build_period_structures(market_df, price_map, ticker_map)
+        if n_stocks is not None:
+            top_tickers = set(entry["ticker"] for entry in universe[:n_stocks])
+            universe = [u for u in universe if u["ticker"] in top_tickers]
+            funds = {t: f for t, f in funds.items() if t in top_tickers}
+            prices = {t: p for t, p in prices.items() if t in top_tickers}
+        market_universe_by_period[period] = universe
+        fundamentals_by_period[period] = funds
+        prices_by_period[period] = prices
+
+    if n_stocks is not None and final_val_prices:
+        last_period_tickers = set(prices_by_period.get(periods[-1], {}).keys())
+        final_val_prices = {t: p for t, p in final_val_prices.items() if t in last_period_tickers}
+
+    _enrich_revenue_growth(fundamentals_by_period, periods)
+    for period in periods:
+        for entry in market_universe_by_period.get(period, []):
+            anon = entry["ticker"]
+            fund_data = fundamentals_by_period.get(period, {}).get(anon, {})
+            if fund_data.get("revenue_growth_yoy") is not None:
+                entry["revenue_growth_yoy"] = fund_data["revenue_growth_yoy"]
+
+    n_with_data = sum(1 for p in periods if prices_by_period.get(p))
+    print(f"  Done: {n_with_data}/{len(periods)} periods with data")
+    if final_val_prices:
+        print(f"  Final valuation prices: {len(final_val_prices)} tickers at {end_date}")
+
+    return periods, market_universe_by_period, fundamentals_by_period, prices_by_period, ticker_map, final_val_prices

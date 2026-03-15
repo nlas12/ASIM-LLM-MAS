@@ -1,0 +1,25 @@
+name: mas_env
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.11
+  - pip
+  - pandas
+  - numpy
+  - pydantic
+
+  - pip:
+      - langchain
+      - langchain-core
+      - langchain-community
+      - langchain-google-genai
+      - langgraph
+      - wrds       
+      - ipykernel
+      # For plotting results
+      - matplotlib
+      - scipy
+      
+# conda env create -f environment.yml
+# conda activate mas_env

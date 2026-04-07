@@ -92,14 +92,17 @@ See [agent_architecture.md](agent_architecture.md) for detailed workflow documen
 ```bash
 # Create conda environment
 conda env create -f environment.yml
-conda activate asim-llm-mas
+conda activate mas_env
+```
 
 # Configure credentials
-# 1. Set up WRDS in ~/.pgpass (passwordless access)
-# 2. Create .env file in project root:
-#    WRDS_USERNAME=your_wrds_username
-#    GOOGLE_API_KEY=your_google_api_key
+1. Set up WRDS in ~/.pgpass (passwordless access)
+2. Create .env file in project root:
+```bash
+WRDS_USERNAME=your_wrds_username
+GOOGLE_API_KEY=your_google_api_key
 ```
+
 
 ## Usage
 

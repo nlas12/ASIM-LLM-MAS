@@ -16,6 +16,7 @@ from dataclasses import dataclass, field
 
 from langgraph.graph import StateGraph, END
 from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_openai import ChatOpenAI
 from langchain_core.messages import SystemMessage, HumanMessage
 from pydantic import BaseModel, Field
 from portfolio import Portfolio
@@ -189,9 +190,13 @@ DECISION_TEMPERATURE: float = 0.1
 
 def make_llm(temperature=None):
     effective_temp = temperature if temperature is not None else LLM_TEMPERATURE
-    return ChatGoogleGenerativeAI(model="gemini-2.5-flash-lite", temperature=effective_temp,
-                                   google_api_key=os.environ.get("GOOGLE_API_KEY"),
-                                   convert_system_message_to_human=False)
+    #return ChatGoogleGenerativeAI(model="gemini-2.5-flash-lite", temperature=effective_temp, google_api_key=os.environ.get("GOOGLE_API_KEY"), convert_system_message_to_human=False)
+    return ChatOpenAI(
+        model=os.environ.get("KICONNECT_MODEL", "Openai GPT OSS 120B"),
+        temperature=effective_temp,
+        openai_api_key=os.environ.get("KICONNECT_API_KEY"),
+        openai_api_base="https://chat.kiconnect.nrw/api/v1",
+    )
 
 def parse_llm_json(raw_text):
     try: return json.loads(raw_text.strip())

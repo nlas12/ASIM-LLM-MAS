@@ -11,8 +11,8 @@ from typing import Optional
 
 from langchain_core.messages import SystemMessage, HumanMessage
 
-from single_agent_pipeline import (
-    DecisionOutput, TradeOrder, AnalysisOutput,
+from pipelines.pipeline_utils import (
+    DecisionOutput, TradeOrder,
     make_llm, parse_llm_json,
     MAX_RETRIES, RETRY_DELAY_SEC, DECISION_TEMPERATURE, LLM_TEMPERATURE,
 )

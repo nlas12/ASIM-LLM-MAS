@@ -12,9 +12,9 @@ from datetime import datetime
 
 from data_loader import prepare_backtest_data
 from compute_benchmarks import build_benchmark_series, fetch_msci_world_index
-import single_agent_pipeline
-from single_agent_pipeline import run_backtest, INITIAL_CAPITAL
-from multi_agent_pipeline import run_multiagent_backtest
+import pipelines.single_agent_pipeline as single_agent_pipeline
+from pipelines.single_agent_pipeline import run_backtest, INITIAL_CAPITAL
+from pipelines.multi_agent_pipeline import run_multiagent_backtest
 from portfolio import compute_metrics
 from experiment_logger import ExperimentLogger, set_logger
 from personas import PERSONAS

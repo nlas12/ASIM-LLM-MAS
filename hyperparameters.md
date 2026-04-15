@@ -25,7 +25,12 @@
 
 ### Persona Prompts
 - adapted from Guru-Agents
-- extended by 2 personas .. 
+- extended by 2 personas: cathie_wood, ray_dalio
+
+### Coordination Mechanisms
+- **Majority Vote**: For each ticker, counts agent BUY/SELL votes. If >50% of agents vote the same direction, executes that trade with average quantity.
+- **Average Size**: Calculates net direction per ticker (buy count - sell count). If net is positive, buys with average quantity; if negative, sells with average quantity.
+- **LLM Manager**: Passes all agent proposals to an LLM "portfolio manager" which synthesizes them into final orders, resolving conflicts via diversification and staying within cash constraints. Falls back to majority vote on LLM failure.
 
 ### Trading Intervals = Quarterly
 - Chosen over monthly cadence to reduce the number of trading periods in one simulation run.

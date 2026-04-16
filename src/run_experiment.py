@@ -21,7 +21,7 @@ from personas import PERSONAS
 
 PERSONA_NAMES = ["buffett", "cathie_wood", "ray_dalio", "ben_graham", "joel_greenblatt"]
 COORDINATION_MECHANISMS = ["majority_vote", "average_size", "llm_manager"]
-N_RUNS = 3
+N_RUNS = 1
 
 
 def main():
@@ -29,7 +29,7 @@ def main():
         description="ASIM WS25/26 — LLM-Based Investor Agent Backtest"
     )
     parser.add_argument("--start", default="2014-01-01")
-    parser.add_argument("--end", default="2023-12-31")
+    parser.add_argument("--end", default="2014-12-31")
     parser.add_argument("--frequency", default="quarterly",
                         choices=["quarterly", "monthly", "semi-annual", "annual"])
     parser.add_argument("--n_runs", type=int, default=N_RUNS)

@@ -174,6 +174,7 @@ python src/run_experiment.py \
 --coordination C1 C2 ...              Coordination mechanisms to test (default: all 3)
 --temperature T                       LLM temperature for screening/analysis (default: 0.5)
 --workers N                           Parallel agents per pass (default: 1)
+```
 
 ### Available Personas
 

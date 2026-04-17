@@ -44,7 +44,6 @@ class Portfolio:
     - ``get_portfolio_allocation``: compute position weights and allocation percentages
     - ``get_concentration_metrics``: analyze portfolio balancing (Herfindahl, diversification)
     - ``snapshot``: record end-of-period NAV with allocation and concentration data
-    - ``performance_summary``: compute CAGR, vol, Sharpe, Sortino, max-DD, composition metrics
     """
 
     holdings: dict[str, int] = field(default_factory=dict)
@@ -277,65 +276,25 @@ class Portfolio:
 
     def save(
         self,
-        path: str,
-        initial_capital: float | None = None,
-        rf_annual: float | None = None,
+        path: str
     ) -> None:
         """
         Save snapshots and performance metrics to a JSON file.
 
         The output contains:
         - ``snapshots``: list of per-period dicts (period, nav, cash, equity, holdings)
-        - ``metrics``: the full ``performance_summary`` dict
 
         Parameters
         ----------
         path : str
             File path for the JSON output (directories created automatically).
         initial_capital : float, optional
-            Passed through to ``performance_summary``.
-        rf_annual : float, optional
-            Passed through to ``performance_summary``.
         """
         import json, os
         os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
 
         payload = {
             "snapshots": self.snapshots,
-            "metrics": self.performance_summary(
-                initial_capital=initial_capital,
-                rf_annual=rf_annual,
-            ),
         }
         with open(path, "w") as f:
             json.dump(payload, f, indent=2, default=str)
-
-
-# ══════════════════════════════════════════════════════════════════════════════
-# Standalone helper — works from plain NAV series (e.g. benchmark indices)
-# ══════════════════════════════════════════════════════════════════════════════
-
-def compute_metrics(
-    period_values: list[dict],
-    initial_capital: float = 1_000_000.0,
-) -> dict:
-    """
-    Compute performance metrics from a list of
-    ``{"period": ..., "portfolio_value": float}`` dicts.
-
-    Useful for benchmark series that don't have a Portfolio object.
-    Internally creates a temporary Portfolio, populates snapshots, and
-    delegates to ``Portfolio.performance_summary``.
-    """
-    if not period_values:
-        return {}
-    p = Portfolio(cash=0.0)
-    for pv in period_values:
-        p.snapshots.append({
-            "period": pv["period"],
-            "nav": pv["portfolio_value"],
-            "cash": 0.0,
-            "equity": pv["portfolio_value"],
-            "holdings": {},
-        })
-    return p.performance_summary(initial_capital=initial_capital)

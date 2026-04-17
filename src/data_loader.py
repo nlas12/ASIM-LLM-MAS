@@ -329,13 +329,145 @@ def _generate_synthetic_data(periods, n_stocks=50):
 
 
 # ══════════════════════════════════════════════════════════════════════════════
+# Dataset Persistence (Save/Load)
+# ══════════════════════════════════════════════════════════════════════════════
+
+def save_dataset(
+    periods, market_universe_by_period, fundamentals_by_period, prices_by_period,
+    ticker_map, final_val_prices, save_path: str
+):
+    """
+    Save prepared backtest dataset to a JSON file for later reuse.
+
+    Parameters
+    ----------
+    periods : list[str]
+        Period labels (e.g., ["Period_001", "Period_002", ...])
+    market_universe_by_period : dict
+        Market universe data keyed by period
+    fundamentals_by_period : dict
+        Fundamental data keyed by period
+    prices_by_period : dict
+        Price data keyed by period
+    ticker_map : dict
+        Mapping of real to anonymized tickers
+    final_val_prices : dict
+        Final valuation prices at end date
+    save_path : str
+        File path to save the dataset (typically .json)
+    """
+    import json
+    import os
+
+    os.makedirs(os.path.dirname(save_path) or ".", exist_ok=True)
+
+    # Create reverse mapping (anonymized → real) for reference
+    reverse_ticker_map = {v: k for k, v in ticker_map.items()}
+    real_tickers = list(ticker_map.keys())
+
+    payload = {
+        "periods": periods,
+        "market_universe_by_period": market_universe_by_period,
+        "fundamentals_by_period": fundamentals_by_period,
+        "prices_by_period": prices_by_period,
+        "ticker_map": ticker_map,
+        "reverse_ticker_map": reverse_ticker_map,
+        "real_tickers": real_tickers,
+        "final_val_prices": final_val_prices,
+    }
+
+    with open(save_path, "w") as f:
+        json.dump(payload, f, indent=2, default=str)
+
+    print(f"  Dataset saved to {save_path}")
+
+
+def load_dataset(load_path: str) -> tuple:
+    """
+    Load a pre-recorded backtest dataset from a JSON file.
+    
+    Returns the exact same 6-tuple that prepare_backtest_data() would return:
+    (periods, market_universe_by_period, fundamentals_by_period,
+     prices_by_period, ticker_map, final_val_prices)
+
+    Parameters
+    ----------
+    load_path : str
+        File path to load the dataset from
+
+    Returns
+    -------
+    tuple
+        (periods, market_universe_by_period, fundamentals_by_period,
+         prices_by_period, ticker_map, final_val_prices)
+
+    Raises
+    ------
+    FileNotFoundError
+        If the load_path does not exist
+    """
+    import json
+
+    if not Path(load_path).exists():
+        raise FileNotFoundError(f"Dataset file not found: {load_path}")
+
+    with open(load_path, "r") as f:
+        payload = json.load(f)
+
+    print(f"  Dataset loaded from {load_path}")
+
+    # Return in same order and structure as prepare_backtest_data()
+    periods = payload["periods"]
+    market_universe_by_period = payload["market_universe_by_period"]
+    fundamentals_by_period = payload["fundamentals_by_period"]
+    prices_by_period = payload["prices_by_period"]
+    ticker_map = payload["ticker_map"]
+    final_val_prices = payload["final_val_prices"]
+
+    return periods, market_universe_by_period, fundamentals_by_period, prices_by_period, ticker_map, final_val_prices
+
+
+# ══════════════════════════════════════════════════════════════════════════════
 # Main Entry Point
 # ══════════════════════════════════════════════════════════════════════════════
 
 def prepare_backtest_data(
     start_date="2014-01-01", end_date="2023-12-31", frequency="quarterly",
-    n_stocks=None, use_synthetic=False, wrds_window_days=10,
+    n_stocks=None, wrds_window_days=10,
+    load_path: Optional[str] = None, save_path: Optional[str] = None,
 ):
+    """
+    Prepare backtest data by loading from WRDS, using synthetic data, or loading from a file.
+
+    Parameters
+    ----------
+    start_date : str
+        Start date (YYYY-MM-DD, default: 2014-01-01)
+    end_date : str
+        End date (YYYY-MM-DD, default: 2023-12-31)
+    frequency : str
+        Rebalancing frequency: "quarterly", "monthly", "semi-annual", "annual" (default: quarterly)
+    n_stocks : int, optional
+        Limit to top N stocks by market cap (default: None = all)
+    wrds_window_days : int
+        Data fetch window in days for WRDS queries (default: 10)
+    load_path : str, optional
+        Path to a pre-recorded dataset .json file. If provided, loads from this instead of fetching.
+    save_path : str, optional
+        Path to save the dataset .json file after fetching (ignored if load_path is used)
+
+    Returns
+    -------
+    tuple
+        (periods, market_universe_by_period, fundamentals_by_period,
+         prices_by_period, ticker_map, final_val_prices)
+    """
+    # Check if loading from a pre-recorded dataset
+    if load_path:
+        print(f"  Loading pre-recorded dataset from {load_path}...")
+        result = load_dataset(load_path)
+        return result
+
     rebalance_dates = generate_rebalance_dates(start_date, end_date, frequency)
     periods = [f"Period_{i+1:03d}" for i in range(len(rebalance_dates))]
 
@@ -347,14 +479,6 @@ def prepare_backtest_data(
     needs_final_valuation = last_rebalance is not None and end_ts > last_rebalance
     if needs_final_valuation:
         print(f"  Final valuation at {end_date} ({(end_ts - last_rebalance).days}d after last trade)")
-
-    if use_synthetic:
-        print("  Using SYNTHETIC data (no WRDS connection)")
-        universe, funds, prices = _generate_synthetic_data(periods, n_stocks or 50)
-        fake_tickers = [f"SYNTH_{i:03d}" for i in range(1, (n_stocks or 50) + 1)]
-        ticker_map = build_ticker_map(fake_tickers)
-        final_val_prices = prices.get(periods[-1], {}) if needs_final_valuation else {}
-        return periods, universe, funds, prices, ticker_map, final_val_prices
 
     print("  Connecting to WRDS...")
     market_universe_by_period = {}; fundamentals_by_period = {}; prices_by_period = {}
@@ -413,4 +537,53 @@ def prepare_backtest_data(
     if final_val_prices:
         print(f"  Final valuation prices: {len(final_val_prices)} tickers at {end_date}")
 
+    # Save dataset if save_path is provided
+    if save_path:
+        save_dataset(periods, market_universe_by_period, fundamentals_by_period,
+                     prices_by_period, ticker_map, final_val_prices, save_path)
+
     return periods, market_universe_by_period, fundamentals_by_period, prices_by_period, ticker_map, final_val_prices
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# Entry Point to save data
+# ══════════════════════════════════════════════════════════════════════════════
+
+if __name__ == "__main__":
+    import argparse
+    
+    parser = argparse.ArgumentParser(description="Prepare backtest data via WRDS, synthetic, or loading.")
+    parser.add_argument("--start", default="2014-01-01", help="Start date (YYYY-MM-DD)")
+    parser.add_argument("--end", default="2023-12-31", help="End date (YYYY-MM-DD)")
+    parser.add_argument("--frequency", default="quarterly", choices=["quarterly", "monthly", "semi-annual", "annual"],
+                        help="Rebalancing frequency")
+    parser.add_argument("--n-stocks", type=int, default=None, help="Limit to top N stocks by market cap")
+    parser.add_argument("--save_path", type=str, default="private_results/data/backtest_data.json",
+                        help="Save dataset to this path")
+    
+    args = parser.parse_args()
+        
+    print("\n" + "="*70)
+    print("DATA LOADER — prepare_backtest_data()")
+    print("="*70)
+    
+    periods, universe, funds, prices, ticker_map, final_vals = prepare_backtest_data(
+        start_date=args.start,
+        end_date=args.end,
+        frequency=args.frequency,
+        n_stocks=args.n_stocks,
+        load_path=None,
+        save_path=args.save_path,
+    )
+    
+    print("\n" + "="*70)
+    print("SUMMARY")
+    print("="*70)
+    print(f"  Periods:         {len(periods)}")
+    print(f"  Tickers:         {len(ticker_map)}")
+    first_period = periods[0] if periods else None
+    if first_period:
+        n_stocks_first = len(universe.get(first_period, []))
+        print(f"  Stocks (P1):     {n_stocks_first}")
+    print(f"  Final vals:      {len(final_vals)} prices")
+    print("="*70 + "\n")

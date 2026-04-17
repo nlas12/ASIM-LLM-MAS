@@ -58,6 +58,7 @@ See [agent_architecture.md](agent_architecture.md) for detailed workflow documen
 ```
 ├── README.md                          # This file
 ├── agent_architecture.md              # Detailed pipeline documentation
+├── experiment_folder_structure.md     # Experiment output folder format
 ├── environment.yml                    # Conda environment
 ├── benchmarks.json                    # Pre-computed benchmark data
 ├── 01_Result_Analysis.ipynb           # Jupyter notebook for results visualization
@@ -68,17 +69,27 @@ See [agent_architecture.md](agent_architecture.md) for detailed workflow documen
 │
 ├── src/
 │   ├── run_experiment.py              # Main entry point (CLI)
-│   ├── single_agent_pipeline.py       # 3-step single-agent LangGraph
-│   ├── multi_agent_pipeline.py        # 8-step multi-agent coordination
 │   ├── personas.py                    # Investor personas & prompts
 │   ├── portfolio.py                   # Trade execution & ledger
 │   ├── data_loader.py                 # Prepare WRDS data for backtests
 │   ├── compute_benchmarks.py          # MSCI World Index benchmarks
-│   └── experiment_logger.py           # LLM call logging
+│   ├── experiment_logger.py           # LLM call logging & audit trail
+│   │
+│   └── pipelines/
+│       ├── single_agent_pipeline.py   # 3-step single-agent LangGraph
+│       ├── multi_agent_pipeline.py    # 8-step multi-agent coordination
+│       └── pipeline_utils.py          # Shared models, memory, LLM utilities
 │
 └── results/
-    ├── portfolios_single/             # Single-agent results (run1-10)
-    └── portfolios_multi/              # Multi-agent results (run1-10)
+    └── experiments/                   # Timestamped experiment folders
+        ├── single_agent_MMDD.HHMM.SS/ # Single-agent experiment
+        │   ├── run1/
+        │   ├── run2/
+        │   └── run3/
+        └── multi_agent_MMDD.HHMM.SS/  # Multi-agent experiment
+            ├── run1/
+            ├── run2/
+            └── run3/
 ```
 
 ## Requirements
@@ -106,29 +117,44 @@ GOOGLE_API_KEY=your_google_api_key
 
 ## Usage
 
-### Basic Single-Agent Run
-
-Run a single persona backtest:
+### Default: Multi-Agent Run (Multi-Agent Coordination Only)
 
 ```bash
 python src/run_experiment.py \
-  --personas buffett \
+  --start 2014-01-01 \
+  --end 2023-12-31 \
+  --frequency quarterly \
+  --n_runs 3
+```
+
+### Single-Agent Run (All 5 Personas as Independent Baselines)
+
+```bash
+python src/run_experiment.py \
+  --mode single \
   --start 2014-01-01 \
   --end 2023-12-31 \
   --n_runs 3
 ```
 
-### Multi-Agent Coordination Run
-
-Compare all 5 personas with coordination mechanisms:
+### Both Single and Multi-Agent Experiments
 
 ```bash
 python src/run_experiment.py \
-  --personas buffett cathie_wood ray_dalio ben_graham joel_greenblatt \
+  --mode both \
   --start 2014-01-01 \
   --end 2023-12-31 \
-  --frequency quarterly \
   --n_runs 3
+```
+
+### Subset of Personas and Coordination Mechanisms
+
+```bash
+python src/run_experiment.py \
+  --mode both \
+  --personas buffett cathie_wood ray_dalio \
+  --coordination majority_vote average_size \
+  --n_runs 5
 ```
 
 ### Command-Line Options
@@ -137,16 +163,17 @@ python src/run_experiment.py \
 --start DATE                          Start date (YYYY-MM-DD, default: 2014-01-01)
 --end DATE                            End date (YYYY-MM-DD, default: 2023-12-31)
 --frequency {quarterly|monthly|...}   Rebalancing frequency (default: quarterly)
---n_runs N                            Number of simulation runs (default: 3)
+--n_runs N                            Number of simulation runs (default: 1)
 --n_stocks N                          Limit to top N stocks by market cap (default: all)
---output FILE                         Results output path
---personas_only                       Skip multi-agent runs
---multi_only                          Skip single-agent baselines
---personas P1 P2 ...                  Specific personas to run
---coordination C1 C2 ...              Coordination mechanisms to test
+--output PATH                         Root folder for experiment results (default: results)
+--mode {single|multi|both}            Experiment type (default: multi)
+                                      - single: Only single-agent baselines
+                                      - multi:  Only multi-agent coordination
+                                      - both:   Both single and multi-agent
+--personas P1 P2 ...                  Specific personas to run (default: all 5)
+--coordination C1 C2 ...              Coordination mechanisms to test (default: all 3)
 --temperature T                       LLM temperature for screening/analysis (default: 0.5)
 --workers N                           Parallel agents per pass (default: 1)
-```
 
 ### Available Personas
 
@@ -164,15 +191,15 @@ python src/run_experiment.py \
 
 ## Results Analysis
 
-After running experiments, explore results:
+After running experiments, results are organized in timestamped experiment folders.
+
+See [experiment_folder_structure.md](experiment_folder_structure.md) for detailed documentation.
+
+Explore results:
 
 ```bash
 jupyter notebook 01_Result_Analysis.ipynb
 ```
-
-Results are saved to:
-- `results/portfolios_single/` — Individual persona backtests
-- `results/portfolios_multi/` — Multi-agent coordination results
 
 ## Publications & Citation
 

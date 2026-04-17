@@ -57,7 +57,7 @@ def _setup_arguments():
                         help="Number of runs per persona/coordination (default: 1)")
     parser.add_argument("--n_stocks", type=int, default=None,
                         help="Limit to top N stocks by market cap (default: all NASDAQ-100)")
-    parser.add_argument("--output", default="results",
+    parser.add_argument("--output", default="private_results",
                         help="Root folder where experiment folders will be created")
     parser.add_argument("--mode", choices=["single", "multi", "both"], default="multi",
                         help="Which experiments to run: single-agent, multi-agent, or both (default: multi)")
@@ -180,15 +180,8 @@ def _run_single_agent_experiments(args, persona_names, periods, universe, funds,
             final_valuation_prices=final_valuation_prices or None,
             experiment_root_dir=single_experiment_folder,
         )
-        all_run_metrics = [r["performance"] for r in runs]
-        result = {
-            "runs": runs,
-            "metrics_per_run": all_run_metrics,
-            "metrics_mean": _mean_metrics(all_run_metrics),
-        }
-        mean_ret = result["metrics_mean"].get("annualized_return_pct", "?")
-        print(f"  Done [{persona.upper()}]. Mean annualized return: {mean_ret}%")
-        return persona, result
+        print(f"  Done [{persona.upper()}]")
+        return persona, {"runs": runs}
 
     _run_tasks_parallel_or_sequential(persona_names, _run_single_persona, args.workers)
 
@@ -213,15 +206,8 @@ def _run_multi_agent_experiments(args, persona_names, coord_mechanisms, periods,
             workers=args.workers,
             experiment_root_dir=multi_experiment_folder,
         )
-        all_run_metrics = [r["performance"] for r in runs]
-        result = {
-            "runs": runs,
-            "metrics_per_run": all_run_metrics,
-            "metrics_mean": _mean_metrics(all_run_metrics),
-        }
-        mean_ret = result["metrics_mean"].get("annualized_return_pct", "?")
-        print(f"  Done [{coord.upper()}]. Mean annualized return: {mean_ret}%")
-        return coord, result
+        print(f"  Done [{coord.upper()}]")
+        return coord, {"runs": runs}
 
     _run_tasks_parallel_or_sequential(coord_mechanisms, _run_multi_coord, args.workers)
 
@@ -231,15 +217,6 @@ def _get_experiment_subfolder(experiment_type: str) -> str:
     timestamp = f"{now.strftime('%m%d')}.{now.strftime('%H%M')}.{int(time.time() % 60):02d}"
     return f"{experiment_type}_{timestamp}"
 
-
-def _mean_metrics(metrics_list):
-    if not metrics_list: return {}
-    keys = [k for k in metrics_list[0] if isinstance(metrics_list[0][k], (int, float))]
-    result = {}
-    for k in keys:
-        vals = [m[k] for m in metrics_list if k in m and isinstance(m[k], (int, float))]
-        result[k] = round(sum(vals) / len(vals), 3) if vals else None
-    return result
 
 if __name__ == "__main__":
     main()

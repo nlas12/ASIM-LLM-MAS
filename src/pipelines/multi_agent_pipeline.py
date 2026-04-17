@@ -333,10 +333,11 @@ def run_multiagent_backtest(
         coordinator_logger.save()
         coordinator_logger.print_summary()
         
+        final_value = period_values[-1]["portfolio_value"] if period_values else initial_capital
         all_run_results.append({
             "run": run_idx + 1, "coordination": coordination, "personas": persona_names,
             "period_values": period_values,
-            "final_value": period_values[-1]["portfolio_value"] if period_values else 0,
+            "final_value": final_value,
         })
 
     return all_run_results

@@ -427,10 +427,12 @@ def run_backtest(persona_name, periods, market_universe_by_period, fundamentals_
         logger.save()
         logger.print_summary()
         
+        final_value = period_values[-1]["portfolio_value"] if period_values else initial_capital
+
         all_run_results.append({
             "run": run_idx + 1, "persona": persona_name,
             "period_values": period_values,
-            "final_value": period_values[-1]["portfolio_value"] if period_values else 0,
+            "final_value": final_value,
             "trade_count": len(memory.trade_history),
         })
 

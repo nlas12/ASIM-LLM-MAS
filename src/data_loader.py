@@ -277,58 +277,6 @@ def _enrich_revenue_growth(fundamentals_by_period, periods):
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-# Synthetic Data Fallback
-# ══════════════════════════════════════════════════════════════════════════════
-
-def _generate_synthetic_data(periods, n_stocks=50):
-    np.random.seed(42)
-    fake_tickers = [f"SYNTH_{i:03d}" for i in range(1, n_stocks + 1)]
-    ticker_map = build_ticker_map(fake_tickers)
-    universe_by_period = {}; fundamentals_by_period = {}; prices_by_period = {}
-
-    for idx, period in enumerate(periods):
-        universe = []; fundamentals = {}; prices = {}
-        for i, real_t in enumerate(fake_tickers):
-            anon = ticker_map[real_t]
-            base_price = 50 + i * 8 + idx * np.random.normal(2, 3)
-            price = max(5.0, round(base_price, 2))
-            base_rev = (1 + i) * 1e9
-            revenue = base_rev * np.random.uniform(0.9, 1.1)
-            net_income = revenue * np.random.uniform(0.05, 0.20)
-            assets = revenue * np.random.uniform(2.0, 5.0)
-            equity = assets * np.random.uniform(0.3, 0.7)
-            shares = np.random.uniform(100e6, 2000e6)
-            pe = price / (net_income * 4 / shares) if net_income > 0 else None
-            pb = price / (equity / shares) if equity > 0 else None
-
-            universe.append({
-                "ticker": anon, "market_cap_rank": i + 1,
-                "pe_ratio": round(pe, 1) if pe else None,
-                "pb_ratio": round(pb, 1) if pb else None,
-                "roe": round(net_income / equity, 3) if equity > 0 else None,
-                "debt_to_equity": round((assets - equity) / equity, 2) if equity > 0 else None,
-                "revenue_growth_yoy": round(np.random.uniform(-0.1, 0.3), 3),
-            })
-            fundamentals[anon] = {
-                "revenue": round(revenue, 2), "net_income": round(net_income, 2),
-                "assets": round(assets, 2), "liabilities": round(assets - equity, 2),
-                "shares_outstanding": round(shares, 0), "close": price,
-                "pe_ratio": round(pe, 2) if pe else None,
-                "pb_ratio": round(pb, 2) if pb else None,
-                "roe": round(net_income / equity, 4) if equity > 0 else None,
-                "roa": round(net_income / assets, 4) if assets > 0 else None,
-                "debt_to_equity": round((assets - equity) / equity, 4) if equity > 0 else None,
-                "net_income_margin": round(net_income / revenue, 4) if revenue > 0 else None,
-                "market_cap": round(price * shares, 2),
-            }
-            prices[anon] = price
-        universe_by_period[period] = universe
-        fundamentals_by_period[period] = fundamentals
-        prices_by_period[period] = prices
-    return universe_by_period, fundamentals_by_period, prices_by_period
-
-
-# ══════════════════════════════════════════════════════════════════════════════
 # Dataset Persistence (Save/Load)
 # ══════════════════════════════════════════════════════════════════════════════
 

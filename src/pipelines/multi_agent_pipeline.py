@@ -322,7 +322,7 @@ def run_multiagent_backtest(
             portfolio.snapshot("End", final_valuation_prices)
 
         portfolio_filename = os.path.join(portfolio_folder, f"{coordination}.json")
-        portfolio.save(portfolio_filename, initial_capital=initial_capital)
+        portfolio.save(portfolio_filename)
         
         # Save all agent loggers
         for persona, logger in agent_loggers.items():

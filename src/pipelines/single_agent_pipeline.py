@@ -421,7 +421,7 @@ def run_backtest(persona_name, periods, market_universe_by_period, fundamentals_
             portfolio.snapshot("End", final_valuation_prices)
 
         portfolio_filename = os.path.join(portfolio_folder, f"{persona_name}.json")
-        portfolio.save(portfolio_filename, initial_capital=initial_capital)
+        portfolio.save(portfolio_filename)
         
         # Save the logger for this run
         logger.save()

@@ -113,13 +113,9 @@ class ExperimentLogger:
     def print_summary(self):
         llm_calls = [r for r in self.records if not r.step.startswith("EVENT:")]
         failures = [r for r in llm_calls if not r.success]
-        print(f"\n  Log Summary: {len(llm_calls)} LLM calls, {len(failures)} failures")
         if failures:
             for f in failures:
                 print(f"    {f.persona}/{f.period}/{f.step}: {f.error[:80]}")
-        total = sum(r.input_tokens + r.output_tokens for r in llm_calls)
-        print(f"    Approx tokens: ~{total:,}")
-
 
 _global_logger = None
 

@@ -3,6 +3,8 @@ Portfolio execution & performance analytics for the backtesting pipeline.
 
 Tracks holdings, cash, snapshots (NAV per period), and computes
 standard risk-adjusted return metrics on quarterly return series.
+Includes portfolio composition analysis: allocation tracking, position sizing,
+and concentration metrics (Herfindahl index, max position %, diversification).
 """
 
 from __future__ import annotations
@@ -39,8 +41,10 @@ class Portfolio:
     Provides:
     - ``apply_trades``: execute BUY/SELL orders against current state
     - ``portfolio_value``: mark-to-market NAV
-    - ``snapshot``: record end-of-period NAV for later analytics
-    - ``performance_summary``: compute CAGR, vol, Sharpe, Sortino, max-DD
+    - ``get_portfolio_allocation``: compute position weights and allocation percentages
+    - ``get_concentration_metrics``: analyze portfolio balancing (Herfindahl, diversification)
+    - ``snapshot``: record end-of-period NAV with allocation and concentration data
+    - ``performance_summary``: compute CAGR, vol, Sharpe, Sortino, max-DD, composition metrics
     """
 
     holdings: dict[str, int] = field(default_factory=dict)
@@ -137,11 +141,89 @@ class Portfolio:
         )
         return self.cash + equity
 
+    def get_portfolio_allocation(self, price_data: dict) -> dict:
+        """
+        Compute allocation percentages for each position.
+
+        Returns
+        -------
+        dict
+            ``{ticker: {value, weight_pct}, ..., "cash": {value, weight_pct}}``
+        """
+        nav = self.portfolio_value(price_data)
+        if nav <= 0:
+            return {"cash": {"value": self.cash, "weight_pct": 100.0}}
+
+        allocation = {}
+        for ticker, shares in self.holdings.items():
+            value = shares * price_data.get(ticker, 0.0)
+            weight_pct = (value / nav) * 100
+            allocation[ticker] = {
+                "value": round(value, 2),
+                "weight_pct": round(weight_pct, 2),
+            }
+
+        cash_pct = (self.cash / nav) * 100
+        allocation["cash"] = {
+            "value": round(self.cash, 2),
+            "weight_pct": round(cash_pct, 2),
+        }
+        return allocation
+
+    def get_concentration_metrics(self, price_data: dict) -> dict:
+        """
+        Compute portfolio concentration and balancing metrics.
+
+        Returns
+        -------
+        dict
+            Keys: ``num_holdings``, ``herfindahl_index`` (0-1), ``max_position_pct``,
+                  ``cash_pct``, ``equity_allocated_pct``.
+        """
+        nav = self.portfolio_value(price_data)
+        if nav <= 0:
+            return {
+                "num_holdings": 0,
+                "herfindahl_index": 0.0,
+                "max_position_pct": 0.0,
+                "cash_pct": 100.0,
+                "equity_allocated_pct": 0.0,
+            }
+
+        # Count non-zero holdings
+        num_holdings = len(self.holdings)
+
+        # Compute position weights
+        weights = []
+        for ticker, shares in self.holdings.items():
+            value = shares * price_data.get(ticker, 0.0)
+            weight = value / nav
+            weights.append(weight)
+
+        # Herfindahl index (sum of squared weights): 0 = perfectly balanced, 1 = all in one position
+        herfindahl = float(np.sum(np.array(weights) ** 2)) if weights else 0.0
+
+        # Max position size
+        max_position = max(weights) * 100 if weights else 0.0
+
+        # Cash and equity allocation
+        equity_value = nav - self.cash
+        equity_pct = (equity_value / nav) * 100 if nav > 0 else 0.0
+        cash_pct = (self.cash / nav) * 100 if nav > 0 else 0.0
+
+        return {
+            "num_holdings": num_holdings,
+            "herfindahl_index": round(herfindahl, 4),
+            "max_position_pct": round(max_position, 2),
+            "cash_pct": round(cash_pct, 2),
+            "equity_allocated_pct": round(equity_pct, 2),
+        }
+
     # ── snapshots ─────────────────────────────────────────────────────────
 
     def snapshot(self, period: str, price_data: dict) -> dict:
         """
-        Record end-of-period portfolio state.
+        Record end-of-period portfolio state including allocation and concentration metrics.
 
         Parameters
         ----------
@@ -153,135 +235,38 @@ class Portfolio:
         Returns
         -------
         dict
-            The snapshot that was appended (for convenience).
+            The snapshot that was appended (for convenience). Includes:
+            - period, nav, cash, equity, holdings
+            - allocation: position weights and values
+            - concentration: Herfindahl index, max position %, portfolio balancing metrics
         """
         nav = self.portfolio_value(price_data)
         equity = sum(
             shares * price_data.get(t, 0.0)
             for t, shares in self.holdings.items()
         )
+        allocation = self.get_portfolio_allocation(price_data)
+        concentration = self.get_concentration_metrics(price_data)
+
         entry = {
             "period": period,
             "nav": nav,
             "cash": self.cash,
             "equity": equity,
             "holdings": dict(self.holdings),
+            "allocation": allocation,
+            "concentration": concentration,
         }
         self.snapshots.append(entry)
         return entry
 
-    # ── performance analytics ─────────────────────────────────────────────
-
-    # Risk-free rate: 2 % p.a.  →  ~0.5 % per quarter
-    _RF_ANNUAL: float = 0.02
-    _PERIODS_PER_YEAR: int = 4  # quarterly
-
-    def performance_summary(
-        self,
-        initial_capital: float | None = None,
-        rf_annual: float | None = None,
-    ) -> dict:
-        """
-        Compute key performance metrics from the recorded snapshots.
-
-        All returns are derived from mark-to-market NAV (cash + equity).
-
-        Metrics
-        -------
-        - **CAGR** (annualized return):
-          ``(∏(1+r_t))^(4/N) − 1``
-        - **Volatility** (annualized):
-          ``σ_q · √4``
-        - **Sharpe Ratio**:
-          ``(r̄_q − r_f,q) / σ_q · √4``
-        - **Sortino Ratio**:
-          ``(r̄_q − r_f,q) / σ_d,q · √4``
-          where ``σ_d,q`` is the downside deviation below ``r_f,q``.
-        - **Maximum Drawdown**:
-          ``max_t( (Peak_t − NAV_t) / Peak_t )``
-
-        Parameters
-        ----------
-        initial_capital : float, optional
-            Starting NAV (default: first snapshot NAV if not provided; 
-            falls back to 1_000_000).
-        rf_annual : float, optional
-            Annual risk-free rate (default: 0.02).
-
-        Returns
-        -------
-        dict  with keys ``cagr``, ``volatility``, ``sharpe``, ``sortino``,
-              ``max_drawdown``, ``total_return``, ``n_periods``.
-        """
-        if not self.snapshots:
-            return {
-                "total_return_pct": 0.0,
-                "annualized_return_pct": 0.0,
-                "annualized_volatility_pct": 0.0,
-                "sharpe_ratio": 0.0,
-                "sortino_ratio": 0.0,
-                "max_drawdown_pct": 0.0,
-                "final_portfolio_value": 0.0,
-                "n_periods": 0,
-            }
-
-        rf = rf_annual if rf_annual is not None else self._RF_ANNUAL
-        ppy = self._PERIODS_PER_YEAR
-        rf_q = rf / ppy  # quarterly risk-free rate
-
-        nav_series = np.array([s["nav"] for s in self.snapshots], dtype=float)
-
-        n_returns = len(nav_series) - 1  # number of quarterly return intervals
-
-        # ── quarterly returns ─────────────────────────────────────────────
-        returns = nav_series[1:] / nav_series[:-1] - 1.0  # length = n_returns
-
-        # ── CAGR ─────────────────────────────────────────────────────────
-        cum_return = np.prod(1.0 + returns)
-        cagr = cum_return ** (ppy / n_returns) - 1.0 if n_returns > 0 else 0.0
-
-        # ── total return ──────────────────────────────────────────────────
-        total_return = cum_return - 1.0
-
-        # ── volatility (annualized) ──────────────────────────────────────
-        vol_q = float(np.std(returns, ddof=1)) if n_returns > 1 else 0.0
-        volatility = vol_q * math.sqrt(ppy)
-
-        # ── Sharpe ratio ─────────────────────────────────────────────────
-        mean_excess = float(np.mean(returns)) - rf_q
-        sharpe = (mean_excess / vol_q * math.sqrt(ppy)) if vol_q > 0 else 0.0
-
-        # ── Sortino ratio ────────────────────────────────────────────────
-        # MAR (Minimum Acceptable Return) = rf_q = r_f / 4  (quarterly).
-        # Downside deviation is computed only from returns below MAR;
-        # returns >= MAR contribute 0 to the semi-variance.
-        downside = returns - rf_q
-        downside_neg = np.where(downside < 0, downside, 0.0)
-        downside_dev = float(np.sqrt(np.mean(downside_neg ** 2)))
-        sortino = (
-            (mean_excess / downside_dev * math.sqrt(ppy))
-            if downside_dev > 0
-            else 0.0
-        )
-
-        # ── maximum drawdown ─────────────────────────────────────────────
-        peak = np.maximum.accumulate(nav_series)
-        drawdowns = (peak - nav_series) / peak
-        max_drawdown = float(np.max(drawdowns))
-
-        return {
-            "total_return_pct": round(float(total_return) * 100, 2),
-            "annualized_return_pct": round(float(cagr) * 100, 2),
-            "annualized_volatility_pct": round(float(volatility) * 100, 2),
-            "sharpe_ratio": round(float(sharpe), 3),
-            "sortino_ratio": round(float(sortino), 3),
-            "max_drawdown_pct": round(float(max_drawdown) * 100, 2),
-            "final_portfolio_value": round(float(nav_series[-1]), 2),
-            "n_periods": n_returns,
-        }
-
     def snapshots_df(self) -> pd.DataFrame:
-        """Return snapshots as a DataFrame."""
+        """
+        Return snapshots as a DataFrame.
+
+        Includes allocation percentages and concentration metrics for each period.
+        Drops the nested holdings dict for a clean table view.
+        """
         if not self.snapshots:
             return pd.DataFrame()
         df = pd.DataFrame(self.snapshots)

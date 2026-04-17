@@ -16,7 +16,7 @@ from pipelines.pipeline_utils import (
     AgentState, AgentMemory, DecisionOutput, TradeOrder, AnalysisOutput, ScreeningOutput,
     make_llm, parse_llm_json, _log,
     MAX_RETRIES, RETRY_DELAY_SEC, DECISION_TEMPERATURE, DEFAULT_MEMORY_CONTEXT, INITIAL_CAPITAL,
-    _KEY_METRICS,
+    MAX_NEW_CANDIDATES, _KEY_METRICS,
 )
 from experiment_logger import get_logger
 
@@ -114,7 +114,7 @@ def _format_universe(market_universe):
 
 def _invoke_llm_with_retries(step_name: str, system_content: str, human_content: str,
                               output_model: type, fallback_func: callable,
-                              temperature: Optional[float] = None) -> dict:
+                              temperature: Optional[float] = None, logger=None) -> dict:
     """
     Generic LLM invocation with retry logic, JSON parsing, validation, and logging.
     Reduces code duplication across screening, analysis, and decision nodes.
@@ -130,17 +130,17 @@ def _invoke_llm_with_retries(step_name: str, system_content: str, human_content:
             raw_content = response.content
             data = parse_llm_json(raw_content)
             result = output_model(**data)
-            _log(step_name, system_content, human_content, raw_content, data, True, temperature=temperature)
+            _log(step_name, system_content, human_content, raw_content, data, True, temperature=temperature, logger=logger)
             return {step_name: result.model_dump()}
         except Exception as e:
             _log(step_name, system_content, human_content, raw_content,
-                 None, False, error=f"Attempt {attempt+1}/{MAX_RETRIES}: {e}", temperature=temperature)
+                 None, False, error=f"Attempt {attempt+1}/{MAX_RETRIES}: {e}", temperature=temperature, logger=logger)
             if attempt < MAX_RETRIES - 1:
                 time.sleep(RETRY_DELAY_SEC)
     
     return fallback_func()
 
-def node_market_screening(state: AgentState) -> dict:
+def node_market_screening(state: AgentState, logger=None) -> dict:
     universe_str = _format_universe(state["market_universe"])
     system_content = SCREENING_SYSTEM_TEMPLATE.format(
         persona_prompt=state["persona_prompt"],
@@ -158,11 +158,12 @@ def node_market_screening(state: AgentState) -> dict:
         system_content=system_content,
         human_content=human_content,
         output_model=ScreeningOutput,
-        fallback_func=lambda: _safe_screening_fallback(state)
+        fallback_func=lambda: _safe_screening_fallback(state),
+        logger=logger
     )
 
 
-def _node_fundamental_analysis_impl(state: AgentState) -> dict:
+def _node_fundamental_analysis_impl(state: AgentState, logger=None) -> dict:
     screening = state.get("screening")
     if screening is None:
         state["step_status"] = {**(state.get("step_status", {})), "analysis": "skipped: no screening"}
@@ -172,7 +173,6 @@ def _node_fundamental_analysis_impl(state: AgentState) -> dict:
         return _safe_analysis_fallback()
 
     fundamentals_db = state.get("fundamentals_db", {})
-    MAX_NEW_CANDIDATES = 10
     recheck = screening["recheck_tickers"]
     new_candidates = [t for t in screening["candidate_tickers"] if t not in recheck]
     all_candidates = recheck + new_candidates[:MAX_NEW_CANDIDATES]
@@ -207,11 +207,12 @@ def _node_fundamental_analysis_impl(state: AgentState) -> dict:
         system_content=system_content,
         human_content=human_content,
         output_model=AnalysisOutput,
-        fallback_func=_safe_analysis_fallback
+        fallback_func=_safe_analysis_fallback,
+        logger=logger
     )
 
 
-def _node_decision_making_impl(state: AgentState) -> dict:
+def _node_decision_making_impl(state: AgentState, logger=None) -> dict:
     analyses_data = state.get("analyses")
     if analyses_data is None or not analyses_data.get("analyses"):
         state["step_status"] = {**(state.get("step_status", {})), "decision": "skipped: no analysis"}
@@ -248,7 +249,8 @@ def _node_decision_making_impl(state: AgentState) -> dict:
         human_content=human_content,
         output_model=DecisionOutput,
         fallback_func=_safe_decision_fallback,
-        temperature=DECISION_TEMPERATURE
+        temperature=DECISION_TEMPERATURE,
+        logger=logger
     )
 
 
@@ -267,11 +269,19 @@ def _should_continue_after_analysis(state):
     if a is None or not a.get("analyses"): return "end"
     return "decision"
 
-def build_agent_graph():
+def build_agent_graph(logger=None):
+    # Create wrapper functions that pass the logger to nodes
+    def screening_node(state):
+        return node_market_screening(state, logger=logger)
+    def analysis_node(state):
+        return _node_fundamental_analysis_impl(state, logger=logger)
+    def decision_node(state):
+        return _node_decision_making_impl(state, logger=logger)
+    
     graph = StateGraph(AgentState)
-    graph.add_node("screening", node_market_screening)
-    graph.add_node("analysis", _node_fundamental_analysis_impl)
-    graph.add_node("decision", _node_decision_making_impl)
+    graph.add_node("screening", screening_node)
+    graph.add_node("analysis", analysis_node)
+    graph.add_node("decision", decision_node)
     graph.set_entry_point("screening")
     graph.add_conditional_edges("screening", _should_continue_after_screening, {"analysis": "analysis", "end": END})
     graph.add_conditional_edges("analysis", _should_continue_after_analysis, {"decision": "decision", "end": END})
@@ -354,13 +364,43 @@ def _process_period(period, portfolio, memory, persona_name, run_idx, n_runs,
 
 def run_backtest(persona_name, periods, market_universe_by_period, fundamentals_by_period,
                  prices_by_period, n_runs=3, initial_capital=INITIAL_CAPITAL,
-                 reverse_ticker_map=None, final_valuation_prices=None):
-    """Execute multi-run backtest for a given persona across multiple periods."""
+                 reverse_ticker_map=None, final_valuation_prices=None,
+                 experiment_root_dir=None, parent_experiment_root_dir=None):
+    """Execute multi-run backtest for a given persona across multiple periods.
+    
+    Args:
+        experiment_root_dir: Root folder for this experiment (creates single_agent_MMDD.HHMM.SS if None)
+        parent_experiment_root_dir: If provided, save to parent's run folder instead (for nested multi-agent calls)
+    """
+    import os
+    from experiment_logger import ExperimentLogger
+    
     persona_prompt = PERSONAS[persona_name]
     all_run_results = []
-    agent_graph = build_agent_graph()  # Build once, reuse across all runs and periods
 
     for run_idx in range(n_runs):
+        # Determine folder structure based on context
+        if parent_experiment_root_dir:
+            # Running as part of multi-agent - use parent's run structure
+            run_folder = os.path.join(parent_experiment_root_dir, f"run{run_idx + 1}")
+            portfolio_folder = os.path.join(run_folder, "portfolios")
+            log_path = os.path.join(run_folder, f"experiment_log_{persona_name}.json")
+        elif experiment_root_dir:
+            # Standalone single-agent with custom root
+            run_folder = os.path.join(experiment_root_dir, f"run{run_idx + 1}")
+            portfolio_folder = os.path.join(run_folder, "portfolios")
+            log_path = os.path.join(run_folder, f"experiment_log_{persona_name}.json")
+        else:
+            # Default fallback
+            portfolio_folder = "results/portfolios"
+            log_path = "results/experiment_log.json"
+        
+        os.makedirs(portfolio_folder, exist_ok=True)
+        
+        # Create a new logger instance for this run
+        logger = ExperimentLogger(log_path=log_path)
+        agent_graph = build_agent_graph(logger=logger)  # Build graph with logger for this run
+        
         portfolio = Portfolio(cash=initial_capital)
         memory = AgentMemory()
         period_values = []
@@ -380,14 +420,18 @@ def run_backtest(persona_name, periods, market_universe_by_period, fundamentals_
             period_values.append({"period": "End", "portfolio_value": fv})
             portfolio.snapshot("End", final_valuation_prices)
 
-        perf = portfolio.performance_summary(initial_capital=initial_capital)
-        portfolio.save(f"results/portfolios/{persona_name}_run{run_idx + 1}.json", initial_capital=initial_capital)
+        portfolio_filename = os.path.join(portfolio_folder, f"{persona_name}.json")
+        portfolio.save(portfolio_filename, initial_capital=initial_capital)
+        
+        # Save the logger for this run
+        logger.save()
+        logger.print_summary()
+        
         all_run_results.append({
             "run": run_idx + 1, "persona": persona_name,
             "period_values": period_values,
             "final_value": period_values[-1]["portfolio_value"] if period_values else 0,
             "trade_count": len(memory.trade_history),
-            "performance": perf,
         })
 
     return all_run_results

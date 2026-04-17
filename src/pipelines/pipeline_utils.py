@@ -180,6 +180,7 @@ class AgentState(TypedDict, total=False):
 
 MAX_RETRIES = 2
 RETRY_DELAY_SEC = 2.0
+MAX_NEW_CANDIDATES = 10  # Maximum new candidates to analyze per period (beyond rechecks)
 
 LLM_TEMPERATURE: float = 0.5
 DECISION_TEMPERATURE: float = 0.1
@@ -234,8 +235,9 @@ def parse_llm_json(raw_text):
     except json.JSONDecodeError: pass
     raise ValueError(f"Could not parse JSON from LLM output:\n{raw_text[:500]}")
 
-def _log(step, sys_prompt, human_prompt, raw_output, parsed, success, error="", temperature=None):
-    logger = get_logger()
+def _log(step, sys_prompt, human_prompt, raw_output, parsed, success, error="", temperature=None, logger=None):
+    if logger is None:
+        logger = get_logger()
     if logger:
         logged_temp = temperature if temperature is not None else LLM_TEMPERATURE
         logger.log_llm_call(step=step, system_prompt=sys_prompt, human_prompt=human_prompt,

@@ -11,10 +11,11 @@ from typing import Optional
 
 from langchain_core.messages import SystemMessage, HumanMessage
 
+import config
+from portfolio import TradeOrder
 from pipelines.pipeline_utils import (
-    DecisionOutput, TradeOrder,
+    DecisionOutput, ProposedTradeOrder,
     make_llm, parse_llm_json,
-    MAX_RETRIES, RETRY_DELAY_SEC, DECISION_TEMPERATURE, LLM_TEMPERATURE,
 )
 from experiment_logger import get_logger
 
@@ -65,7 +66,7 @@ Synthesize into final orders as JSON."""
 def _log(step, sys_prompt, human_prompt, raw_output, parsed, success, error="", temperature=None):
     logger = get_logger()
     if logger:
-        logged_temp = temperature if temperature is not None else LLM_TEMPERATURE
+        logged_temp = temperature if temperature is not None else config.LLM_TEMPERATURE
         logger.log_llm_call(step=step, system_prompt=sys_prompt, human_prompt=human_prompt,
                             raw_output=raw_output or "", parsed_output=parsed,
                             success=success, error=error, temperature=logged_temp)
@@ -178,24 +179,32 @@ class LLMManagerCoordination(CoordinationMechanism):
         human = HumanMessage(content=human_content)
         
         raw_content = ""
-        for attempt in range(MAX_RETRIES):
+        for attempt in range(config.MAX_RETRIES):
             try:
-                llm = make_llm(temperature=DECISION_TEMPERATURE)
+                llm = make_llm(temperature=config.DECISION_TEMPERATURE)
                 response = llm.invoke([system, human])
                 raw_content = response.content
                 data = parse_llm_json(raw_content)
                 decision = DecisionOutput(**data)
-                _log("llm_manager", system_content, human_content, raw_content, data, True, temperature=DECISION_TEMPERATURE)
-                return decision.orders, status_messages
+                _log("llm_manager", system_content, human_content, raw_content, data, True, temperature=config.DECISION_TEMPERATURE)
+                executable = [
+                    TradeOrder(ticker=o.ticker, action=o.action, quantity=o.quantity, reasoning=o.reasoning)
+                    for o in decision.orders if o.action in ("BUY", "SELL") and o.quantity > 0
+                ]
+                return executable, status_messages
             except Exception as e:
                 _log("llm_manager", system_content, human_content, raw_content,
-                     None, False, error=f"Attempt {attempt+1}/{MAX_RETRIES}: {e}", temperature=DECISION_TEMPERATURE)
-                if attempt < MAX_RETRIES - 1:
+                     None, False, error=f"Attempt {attempt+1}/{config.MAX_RETRIES}: {e}", temperature=config.DECISION_TEMPERATURE)
+                if attempt < config.MAX_RETRIES - 1:
                     status_messages.append(f"LLM Manager attempt {attempt+1} failed: {e}. Retrying...")
-                    time.sleep(RETRY_DELAY_SEC)
+                    time.sleep(config.RETRY_DELAY_SEC)
                 else:
-                    status_messages.append(f"LLM Manager failed after {MAX_RETRIES} attempts: {e}. Falling back to majority vote.")
-        
+                    status_messages.append(f"LLM Manager failed after {config.MAX_RETRIES} attempts: {e}. Falling back to majority vote.")
+                    print(f"FALLBACK | coordination: llm_manager failed after retry; falling back to majority vote")
+                    lgr = get_logger()
+                    if lgr:
+                        lgr.log_event("FALLBACK", {"step": "llm_manager", "reason": "LLM failure; fell back to majority_vote"})
+
         return MajorityVoteCoordination().aggregate(revised_states, price_data, portfolio)[0], status_messages
 
 

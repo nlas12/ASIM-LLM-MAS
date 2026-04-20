@@ -10,9 +10,9 @@ import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime
 
+import config
 from data_loader import prepare_backtest_data
 from compute_benchmarks import build_benchmark_series, fetch_msci_world_index
-import pipelines.single_agent_pipeline as single_agent_pipeline
 from pipelines.single_agent_pipeline import run_backtest
 from pipelines.multi_agent_pipeline import run_multiagent_backtest
 from personas import PERSONAS
@@ -85,7 +85,7 @@ def _validate_and_setup(args):
         print(f"Available: {list(PERSONAS.keys())}")
         return None, None
 
-    single_agent_pipeline.LLM_TEMPERATURE = args.temperature
+    config.LLM_TEMPERATURE = args.temperature
     return persona_names, coord_mechanisms
 
 def _print_startup_info(args, persona_names, coord_mechanisms):
@@ -94,7 +94,7 @@ def _print_startup_info(args, persona_names, coord_mechanisms):
     print("ASIM WS25/26 — LLM-Based Investor Agent Backtest Experiment")
     print(f"Start: {args.start} | End: {args.end} | Freq: {args.frequency} | Runs: {args.n_runs}")
     print(f"Mode: {args.mode.upper()}")
-    print(f"Temperature: {args.temperature} (decisions: {single_agent_pipeline.DECISION_TEMPERATURE})")
+    print(f"Temperature: {args.temperature} (decisions: {config.DECISION_TEMPERATURE})")
     print(f"Workers: {args.workers}")
     print(f"Personas: {', '.join(persona_names)}")
     print(f"Coordination: {', '.join(coord_mechanisms)}")

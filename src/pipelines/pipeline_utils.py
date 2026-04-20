@@ -2,13 +2,11 @@
 Pipeline Utilities — Shared Infrastructure
 pipeline_utils.py
 ================================================================
-Shared Pydantic models, state, memory, constants, and LLM utilities
+Shared Pydantic models, state, memory, and LLM utilities
 used by both single-agent and multi-agent pipelines.
+Configuration constants live in :mod:`config`.
 """
-from dotenv import load_dotenv
-load_dotenv()
 
-import os
 import json
 import re
 from typing import Any, TypedDict
@@ -16,11 +14,14 @@ from dataclasses import dataclass, field
 
 from langchain_openai import ChatOpenAI
 from pydantic import BaseModel, Field
+
+import config
+from portfolio import TradeOrder
 from experiment_logger import get_logger
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-# Pydantic Schemas
+# Pydantic Schemas (LLM I/O)
 # ══════════════════════════════════════════════════════════════════════════════
 
 class ScreeningOutput(BaseModel):
@@ -38,14 +39,19 @@ class CompanyAnalysis(BaseModel):
 class AnalysisOutput(BaseModel):
     analyses: list[CompanyAnalysis]
 
-class TradeOrder(BaseModel):
+class ProposedTradeOrder(BaseModel):
+    """LLM-proposed order (pre-execution).
+
+    Allows HOLD with quantity=0; execution layer (portfolio.TradeOrder)
+    enforces the stricter BUY/SELL-only, quantity>0 contract.
+    """
     ticker: str
     action: str = Field(description="BUY, SELL, or HOLD")
     quantity: int = Field(ge=0, description="Number of shares. 0 for HOLD.")
     reasoning: str = Field(description="Max 15 words.")
 
 class DecisionOutput(BaseModel):
-    orders: list[TradeOrder]
+    orders: list[ProposedTradeOrder]
     portfolio_rationale: str = Field(description="One sentence.")
 
 
@@ -123,7 +129,7 @@ class AgentMemory:
     def to_prompt_context(self):
         """Build memory context string for LLM prompts."""
         context_parts = []
-        
+
         # Current positions
         if self.position_tracker:
             position_lines = ["POSITIONS:"]
@@ -134,7 +140,7 @@ class AgentMemory:
                     f"P&L={pnl_pct:+.1f}%, held {pos.periods_held}p"
                 )
             context_parts.append("\n".join(position_lines))
-        
+
         # Recent trades
         if self.trade_history:
             trade_lines = ["TRADES:"]
@@ -143,15 +149,15 @@ class AgentMemory:
                     f"  {trade.period}: {trade.action} {trade.ticker} x{trade.quantity} @${trade.price:.0f}"
                 )
             context_parts.append("\n".join(trade_lines))
-        
+
         # Recent returns
         if self.period_returns:
             returns_str = ", ".join(
                 f"{p['period']}:{p['return_pct']:+.1f}%" for p in self.period_returns[-4:]
             )
             context_parts.append(f"RETURNS: {returns_str}")
-        
-        return "\n".join(context_parts) if context_parts else DEFAULT_MEMORY_CONTEXT
+
+        return "\n".join(context_parts) if context_parts else config.DEFAULT_MEMORY_CONTEXT
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -175,48 +181,16 @@ class AgentState(TypedDict, total=False):
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-# Configuration Constants
-# ══════════════════════════════════════════════════════════════════════════════
-
-MAX_RETRIES = 2
-RETRY_DELAY_SEC = 2.0
-MAX_NEW_CANDIDATES = 10  # Maximum new candidates to analyze per period (beyond rechecks)
-
-LLM_TEMPERATURE: float = 0.5
-DECISION_TEMPERATURE: float = 0.1
-DEFAULT_MEMORY_CONTEXT: str = "FIRST PERIOD."
-INITIAL_CAPITAL = 1_000_000.0
-
-_KEY_METRICS = [
-    # Valuation
-    "pe_ratio", "pb_ratio", "market_cap", "enterprise_value",
-    # Greenblatt
-    "earnings_yield", "return_on_capital",
-    # Profitability
-    "roe", "roa", "net_income_margin", "revenue", "net_income", "operating_income",
-    # Balance sheet
-    "assets", "liabilities", "cash_equivalents", "current_ratio", "debt_to_equity",
-    "current_assets", "current_liabilities", "long_term_debt",
-    # Graham
-    "ncav", "ncav_per_share", "book_value_per_share",
-    # Growth
-    "revenue_growth_yoy",
-    # Price data
-    "open", "high", "low", "close", "volume",
-]
-
-
-# ══════════════════════════════════════════════════════════════════════════════
 # LLM Factory + JSON Parsing
 # ══════════════════════════════════════════════════════════════════════════════
 
-def make_llm(temperature=None):
-    effective_temp = temperature if temperature is not None else LLM_TEMPERATURE
+def make_llm(temperature: float | None = None) -> ChatOpenAI:
+    effective_temp = temperature if temperature is not None else config.LLM_TEMPERATURE
     return ChatOpenAI(
-        model=os.environ.get("KICONNECT_MODEL", "Openai GPT OSS 120B"),
+        model=config.MODEL_NAME,
         temperature=effective_temp,
-        openai_api_key=os.environ.get("KICONNECT_API_KEY"),
-        openai_api_base="https://chat.kiconnect.nrw/api/v1",
+        openai_api_key=config.API_KEY,
+        openai_api_base=config.API_BASE_URL,
     )
 
 def parse_llm_json(raw_text):
@@ -239,7 +213,7 @@ def _log(step, sys_prompt, human_prompt, raw_output, parsed, success, error="", 
     if logger is None:
         logger = get_logger()
     if logger:
-        logged_temp = temperature if temperature is not None else LLM_TEMPERATURE
+        logged_temp = temperature if temperature is not None else config.LLM_TEMPERATURE
         logger.log_llm_call(step=step, system_prompt=sys_prompt, human_prompt=human_prompt,
                             raw_output=raw_output or "", parsed_output=parsed,
                             success=success, error=error, temperature=logged_temp)

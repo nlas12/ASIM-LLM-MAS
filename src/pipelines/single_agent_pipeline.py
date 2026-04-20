@@ -10,13 +10,12 @@ from typing import Optional
 from langgraph.graph import StateGraph, END
 from langchain_core.messages import SystemMessage, HumanMessage
 
-from portfolio import Portfolio
+import config
+from portfolio import Portfolio, TradeOrder
 from personas import PERSONAS
 from pipelines.pipeline_utils import (
-    AgentState, AgentMemory, DecisionOutput, TradeOrder, AnalysisOutput, ScreeningOutput,
+    AgentState, AgentMemory, DecisionOutput, ProposedTradeOrder, AnalysisOutput, ScreeningOutput,
     make_llm, parse_llm_json, _log,
-    MAX_RETRIES, RETRY_DELAY_SEC, DECISION_TEMPERATURE, DEFAULT_MEMORY_CONTEXT, INITIAL_CAPITAL,
-    MAX_NEW_CANDIDATES, _KEY_METRICS,
 )
 from experiment_logger import get_logger
 
@@ -25,7 +24,26 @@ from experiment_logger import get_logger
 # Retry / Fallback
 # ══════════════════════════════════════════════════════════════════════════════
 
-def _safe_screening_fallback(state: dict) -> dict:
+def _announce_fallback(state: dict, step: str, reason: str, logger=None) -> None:
+    """Mark step_status, emit a logger event, and print a FALLBACK line."""
+    state.setdefault("step_status", {})[step] = f"fallback: {reason}"
+    persona = state.get("persona_prompt", "")[:20]  # first 20 chars as id hint
+    period = state.get("period_label", "?")
+    print(f"FALLBACK | {period} | {step}: {reason}")
+    lgr = logger or get_logger()
+    if lgr:
+        lgr.log_event("FALLBACK", {"step": step, "reason": reason}, period=period)
+
+
+def _empty_analysis_result() -> dict:
+    return {"analyses": {"analyses": []}}
+
+def _empty_decision_result() -> dict:
+    return {"decision": {"orders": [], "portfolio_rationale": "Fallback: LLM decision failed after retry. Holding."}}
+
+
+def _safe_screening_fallback(state: dict, logger=None) -> dict:
+    _announce_fallback(state, "screening", "LLM screening failed after retry; picked first 10 universe tickers", logger=logger)
     holdings = state.get("portfolio", {})
     recheck = list(holdings.keys())
     universe = state.get("market_universe", [])
@@ -35,11 +53,13 @@ def _safe_screening_fallback(state: dict) -> dict:
                                rationale="Fallback: LLM screening failed after retry.")
     return {"screening": fallback.model_dump()}
 
-def _safe_analysis_fallback() -> dict:
-    return {"analyses": {"analyses": []}}
+def _safe_analysis_fallback(state: dict, logger=None) -> dict:
+    _announce_fallback(state, "analysis", "LLM analysis failed after retry; returning empty analyses", logger=logger)
+    return _empty_analysis_result()
 
-def _safe_decision_fallback() -> dict:
-    return {"decision": {"orders": [], "portfolio_rationale": "Fallback: LLM decision failed after retry. Holding."}}
+def _safe_decision_fallback(state: dict, logger=None) -> dict:
+    _announce_fallback(state, "decision", "LLM decision failed after retry; holding", logger=logger)
+    return _empty_decision_result()
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -123,7 +143,7 @@ def _invoke_llm_with_retries(step_name: str, system_content: str, human_content:
     human = HumanMessage(content=human_content)
     raw_content = ""
     
-    for attempt in range(MAX_RETRIES):
+    for attempt in range(config.MAX_RETRIES):
         try:
             llm = make_llm(temperature=temperature)
             response = llm.invoke([system, human])
@@ -134,9 +154,9 @@ def _invoke_llm_with_retries(step_name: str, system_content: str, human_content:
             return {step_name: result.model_dump()}
         except Exception as e:
             _log(step_name, system_content, human_content, raw_content,
-                 None, False, error=f"Attempt {attempt+1}/{MAX_RETRIES}: {e}", temperature=temperature, logger=logger)
-            if attempt < MAX_RETRIES - 1:
-                time.sleep(RETRY_DELAY_SEC)
+                 None, False, error=f"Attempt {attempt+1}/{config.MAX_RETRIES}: {e}", temperature=temperature, logger=logger)
+            if attempt < config.MAX_RETRIES - 1:
+                time.sleep(config.RETRY_DELAY_SEC)
     
     return fallback_func()
 
@@ -145,7 +165,7 @@ def node_market_screening(state: AgentState, logger=None) -> dict:
     system_content = SCREENING_SYSTEM_TEMPLATE.format(
         persona_prompt=state["persona_prompt"],
         period_label=state["period_label"],
-        memory_context=state.get("memory_context", DEFAULT_MEMORY_CONTEXT)
+        memory_context=state.get("memory_context", config.DEFAULT_MEMORY_CONTEXT)
     )
     human_content = SCREENING_HUMAN_TEMPLATE.format(
         portfolio_json=json.dumps(state["portfolio"]),
@@ -158,7 +178,7 @@ def node_market_screening(state: AgentState, logger=None) -> dict:
         system_content=system_content,
         human_content=human_content,
         output_model=ScreeningOutput,
-        fallback_func=lambda: _safe_screening_fallback(state),
+        fallback_func=lambda: _safe_screening_fallback(state, logger=logger),
         logger=logger
     )
 
@@ -167,21 +187,21 @@ def _node_fundamental_analysis_impl(state: AgentState, logger=None) -> dict:
     screening = state.get("screening")
     if screening is None:
         state["step_status"] = {**(state.get("step_status", {})), "analysis": "skipped: no screening"}
-        return _safe_analysis_fallback()
+        return _empty_analysis_result()
     if not screening["recheck_tickers"] and not screening["candidate_tickers"]:
         state["step_status"] = {**(state.get("step_status", {})), "analysis": "skipped: no candidates"}
-        return _safe_analysis_fallback()
+        return _empty_analysis_result()
 
     fundamentals_db = state.get("fundamentals_db", {})
     recheck = screening["recheck_tickers"]
     new_candidates = [t for t in screening["candidate_tickers"] if t not in recheck]
-    all_candidates = recheck + new_candidates[:MAX_NEW_CANDIDATES]
+    all_candidates = recheck + new_candidates[:config.MAX_NEW_CANDIDATES]
 
     detailed = {}
     for t in all_candidates:
         raw = fundamentals_db.get(t, {})
         entry = {}
-        for k in _KEY_METRICS:
+        for k in config.KEY_METRICS:
             if k in raw and raw[k] is not None:
                 v = raw[k]
                 if isinstance(v, float) and abs(v) > 1_000_000:
@@ -193,7 +213,7 @@ def _node_fundamental_analysis_impl(state: AgentState, logger=None) -> dict:
     system_content = ANALYSIS_SYSTEM_TEMPLATE.format(
         persona_prompt=state["persona_prompt"],
         period_label=state["period_label"],
-        memory_context=state.get("memory_context", DEFAULT_MEMORY_CONTEXT)
+        memory_context=state.get("memory_context", config.DEFAULT_MEMORY_CONTEXT)
     )
     human_content = ANALYSIS_HUMAN_TEMPLATE.format(
         candidates=all_candidates,
@@ -207,7 +227,7 @@ def _node_fundamental_analysis_impl(state: AgentState, logger=None) -> dict:
         system_content=system_content,
         human_content=human_content,
         output_model=AnalysisOutput,
-        fallback_func=_safe_analysis_fallback,
+        fallback_func=lambda: _safe_analysis_fallback(state, logger=logger),
         logger=logger
     )
 
@@ -216,7 +236,7 @@ def _node_decision_making_impl(state: AgentState, logger=None) -> dict:
     analyses_data = state.get("analyses")
     if analyses_data is None or not analyses_data.get("analyses"):
         state["step_status"] = {**(state.get("step_status", {})), "decision": "skipped: no analysis"}
-        return _safe_decision_fallback()
+        return _empty_decision_result()
 
     price_data = state.get("price_data", {})
     analysis_summary = []
@@ -235,7 +255,7 @@ def _node_decision_making_impl(state: AgentState, logger=None) -> dict:
     system_content = DECISION_SYSTEM_TEMPLATE.format(
         persona_prompt=state["persona_prompt"],
         period_label=state["period_label"],
-        memory_context=state.get("memory_context", DEFAULT_MEMORY_CONTEXT)
+        memory_context=state.get("memory_context", config.DEFAULT_MEMORY_CONTEXT)
     )
     human_content = DECISION_HUMAN_TEMPLATE.format(
         cash=state["cash"],
@@ -248,8 +268,8 @@ def _node_decision_making_impl(state: AgentState, logger=None) -> dict:
         system_content=system_content,
         human_content=human_content,
         output_model=DecisionOutput,
-        fallback_func=_safe_decision_fallback,
-        temperature=DECISION_TEMPERATURE,
+        fallback_func=lambda: _safe_decision_fallback(state, logger=logger),
+        temperature=config.DECISION_TEMPERATURE,
         logger=logger
     )
 
@@ -332,10 +352,11 @@ def _process_period(period, portfolio, memory, persona_name, run_idx, n_runs,
     }
     final_state = agent_graph.invoke(initial_state)
     
-    # Print step status (skips/errors) with run and period context
+    # Print step status (skips/fallbacks) with run and period context
     step_status = final_state.get("step_status", {})
     for step, status in step_status.items():
-        print(f"ERROR | Run {run_idx + 1}/{n_runs} | {period} | {step.capitalize()}: {status}")
+        tag = "FALLBACK" if status.startswith("fallback:") else "SKIP"
+        print(f"{tag} | Run {run_idx + 1}/{n_runs} | {period} | {step.capitalize()}: {status}")
     
     # Print any pipeline errors
     if final_state.get("error"):
@@ -344,9 +365,12 @@ def _process_period(period, portfolio, memory, persona_name, run_idx, n_runs,
     # Process decisions and execute trades
     decision_data = final_state.get("decision")
     if decision_data and decision_data.get("orders"):
-        all_orders = [TradeOrder(**o) for o in decision_data["orders"]]
-        executable_orders = [o for o in all_orders if o.action in ("BUY", "SELL") and o.quantity > 0]
-        hold_orders = [o for o in all_orders if o.action == "HOLD"]
+        proposed = [ProposedTradeOrder(**o) for o in decision_data["orders"]]
+        executable_orders = [
+            TradeOrder(ticker=o.ticker, action=o.action, quantity=o.quantity, reasoning=o.reasoning)
+            for o in proposed if o.action in ("BUY", "SELL") and o.quantity > 0
+        ]
+        hold_orders = [o for o in proposed if o.action == "HOLD"]
         rationale = decision_data.get("portfolio_rationale", "")
         
         _execute_trades(executable_orders, hold_orders, portfolio, price_data,
@@ -363,7 +387,7 @@ def _process_period(period, portfolio, memory, persona_name, run_idx, n_runs,
 
 
 def run_backtest(persona_name, periods, market_universe_by_period, fundamentals_by_period,
-                 prices_by_period, n_runs=3, initial_capital=INITIAL_CAPITAL,
+                 prices_by_period, n_runs=3, initial_capital=config.INITIAL_CAPITAL,
                  reverse_ticker_map=None, final_valuation_prices=None,
                  experiment_root_dir=None, parent_experiment_root_dir=None):
     """Execute multi-run backtest for a given persona across multiple periods.
@@ -373,8 +397,9 @@ def run_backtest(persona_name, periods, market_universe_by_period, fundamentals_
         parent_experiment_root_dir: If provided, save to parent's run folder instead (for nested multi-agent calls)
     """
     import os
-    from experiment_logger import ExperimentLogger
-    
+    from experiment_logger import ExperimentLogger, with_logger
+    from run_metadata import write_run_metadata
+
     persona_prompt = PERSONAS[persona_name]
     all_run_results = []
 
@@ -392,40 +417,46 @@ def run_backtest(persona_name, periods, market_universe_by_period, fundamentals_
             log_path = os.path.join(run_folder, f"experiment_log_{persona_name}.json")
         else:
             # Default fallback
+            run_folder = None
             portfolio_folder = "results/portfolios"
             log_path = "results/experiment_log.json"
         
         os.makedirs(portfolio_folder, exist_ok=True)
-        
+        if run_folder:
+            write_run_metadata(run_folder, mode="single_agent",
+                               persona=persona_name, run_idx=run_idx + 1, n_runs=n_runs)
+
         # Create a new logger instance for this run
-        logger = ExperimentLogger(log_path=log_path)
+        logger = ExperimentLogger(log_path=log_path, model=config.MODEL_NAME)
         agent_graph = build_agent_graph(logger=logger)  # Build graph with logger for this run
-        
+
         portfolio = Portfolio(cash=initial_capital)
         memory = AgentMemory()
         period_values = []
 
-        for period in periods:
-            print(f"\n{'─'*70}\n  Persona: {persona_name.upper()} | Run {run_idx + 1}/{n_runs} Period: {period}\n{'─'*70}")
+        with with_logger(logger):
+            logger.set_context(pipeline="single_agent", persona=persona_name, run=run_idx + 1)
+            for period in periods:
+                print(f"\n{'─'*70}\n  Persona: {persona_name.upper()} | Run {run_idx + 1}/{n_runs} Period: {period}\n{'─'*70}")
 
-            pv = _process_period(period, portfolio, memory, persona_name, run_idx, n_runs,
-                                prices_by_period, fundamentals_by_period, market_universe_by_period,
-                                persona_prompt, initial_capital, reverse_ticker_map, agent_graph)
-            
-            period_values.append({"period": period, "portfolio_value": pv})
+                pv = _process_period(period, portfolio, memory, persona_name, run_idx, n_runs,
+                                    prices_by_period, fundamentals_by_period, market_universe_by_period,
+                                    persona_prompt, initial_capital, reverse_ticker_map, agent_graph)
 
-        # Final valuation at end date (no trading)
-        if final_valuation_prices:
-            fv = portfolio.portfolio_value(final_valuation_prices)
-            period_values.append({"period": "End", "portfolio_value": fv})
-            portfolio.snapshot("End", final_valuation_prices)
+                period_values.append({"period": period, "portfolio_value": pv})
 
-        portfolio_filename = os.path.join(portfolio_folder, f"{persona_name}.json")
-        portfolio.save(portfolio_filename)
-        
-        # Save the logger for this run
-        logger.save()
-        logger.print_summary()
+            # Final valuation at end date (no trading)
+            if final_valuation_prices:
+                fv = portfolio.portfolio_value(final_valuation_prices)
+                period_values.append({"period": "End", "portfolio_value": fv})
+                portfolio.snapshot("End", final_valuation_prices)
+
+            portfolio_filename = os.path.join(portfolio_folder, f"{persona_name}.json")
+            portfolio.save(portfolio_filename)
+
+            # Save the logger for this run
+            logger.save()
+            logger.print_summary()
         
         final_value = period_values[-1]["portfolio_value"] if period_values else initial_capital
 

@@ -1,10 +1,16 @@
 """
 Experiment Logger - Full LLM I/O Logging for Research Transparency
+
+The active logger is exposed via a ``contextvars.ContextVar`` so each
+thread / worker task has its own logger, and nested code (e.g. LangGraph
+nodes) can reach it via :func:`get_logger` without explicit plumbing.
 """
 
+import contextvars
 import json
 import os
 import threading
+from contextlib import contextmanager
 from datetime import datetime
 from dataclasses import dataclass, field, asdict
 from typing import Any, Optional
@@ -24,15 +30,17 @@ class LLMCallRecord:
     parsed_output: Any
     success: bool
     error: str = ""
-    model: str = "gemini-2.5-flash"
+    model: str = ""
     temperature: float = 0.2
+    # chars/4 heuristic — avoids pulling a tokenizer dep for a non-OpenAI model
     input_tokens: int = 0
     output_tokens: int = 0
 
 
 class ExperimentLogger:
-    def __init__(self, log_path="results/experiment_log.json"):
+    def __init__(self, log_path="results/experiment_log.json", model: str = ""):
         self.log_path = log_path
+        self.model = model
         self.records = []
         self._lock = threading.Lock()
         self._local = threading.local()
@@ -70,6 +78,7 @@ class ExperimentLogger:
             raw_output=raw_output,
             parsed_output=parsed_output,
             success=success, error=error,
+            model=self.model,
             temperature=temperature,
             input_tokens=input_tokens,
             output_tokens=output_tokens,
@@ -88,6 +97,7 @@ class ExperimentLogger:
             step="EVENT:" + event_type,
             system_prompt="", human_prompt="", raw_output="",
             parsed_output=data, success=True,
+            model=self.model,
         )
         with self._lock:
             self.records.append(record)
@@ -97,6 +107,7 @@ class ExperimentLogger:
         llm_calls = [r for r in self.records if not r.step.startswith("EVENT:")]
         output = {
             "experiment_log": {
+                "model": self.model,
                 "total_llm_calls": len(llm_calls),
                 "total_events": len(self.records) - len(llm_calls),
                 "total_records": len(self.records),
@@ -117,11 +128,27 @@ class ExperimentLogger:
             for f in failures:
                 print(f"    {f.persona}/{f.period}/{f.step}: {f.error[:80]}")
 
-_global_logger = None
 
-def get_logger():
-    return _global_logger
+# ── Thread-/task-local active logger ─────────────────────────────────────────
+_active_logger: contextvars.ContextVar[Optional[ExperimentLogger]] = contextvars.ContextVar(
+    "experiment_logger", default=None
+)
 
-def set_logger(logger):
-    global _global_logger
-    _global_logger = logger
+
+def get_logger() -> Optional[ExperimentLogger]:
+    return _active_logger.get()
+
+
+def set_logger(logger: Optional[ExperimentLogger]):
+    """Bind logger for the current context. Returns a reset token."""
+    return _active_logger.set(logger)
+
+
+@contextmanager
+def with_logger(logger: Optional[ExperimentLogger]):
+    """Scope a logger to a block — restores the previous binding on exit."""
+    token = _active_logger.set(logger)
+    try:
+        yield logger
+    finally:
+        _active_logger.reset(token)

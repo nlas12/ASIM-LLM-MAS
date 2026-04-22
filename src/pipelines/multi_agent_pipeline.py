@@ -331,6 +331,7 @@ def run_multiagent_backtest(
         period_values = []
 
         for period in periods:
+            print(f"\n Started Run {run_idx + 1}/{n_runs} | Period {period}/{periods}")
             pv = _process_period_multiagent(
                 period, portfolio, agent_memories, persona_names, run_idx, n_runs,
                 prices_by_period, fundamentals_by_period, market_universe_by_period,

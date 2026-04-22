@@ -9,8 +9,10 @@ Configuration constants live in :mod:`config`.
 
 import json
 import re
+import threading
 from typing import Any, TypedDict
 from dataclasses import dataclass, field
+from queue import Queue, Empty
 
 from langchain_openai import ChatOpenAI
 from pydantic import BaseModel, Field
@@ -184,14 +186,56 @@ class AgentState(TypedDict, total=False):
 # LLM Factory + JSON Parsing
 # ══════════════════════════════════════════════════════════════════════════════
 
+# ══════════════════════════════════════════════════════════════════════════════
+# Thread-Local LLM Client Pool (Per-Thread Connection Reuse)
+# ══════════════════════════════════════════════════════════════════════════════
+
+class LLMClientPool:
+    """Thread-safe pool of LLM clients with per-thread caching.
+    
+    Each thread gets its own client instance, reused across calls.
+    This reduces connection overhead while maintaining context isolation.
+    """
+    _instance = None
+    _lock = threading.Lock()
+    _thread_local = threading.local()
+    
+    def __new__(cls):
+        if cls._instance is None:
+            with cls._lock:
+                if cls._instance is None:
+                    cls._instance = super().__new__(cls)
+        return cls._instance
+    
+    def get_client(self, temperature: float | None = None) -> ChatOpenAI:
+        """Get or create LLM client for current thread."""
+        # Generate cache key based on temperature
+        effective_temp = temperature if temperature is not None else config.LLM_TEMPERATURE
+        cache_key = f"client_{effective_temp}"
+        
+        # Check thread-local cache
+        if not hasattr(self._thread_local, 'clients'):
+            self._thread_local.clients = {}
+        
+        if cache_key not in self._thread_local.clients:
+            # Create new client for this thread/temperature combination
+            self._thread_local.clients[cache_key] = ChatOpenAI(
+                model=config.MODEL_NAME,
+                temperature=effective_temp,
+                openai_api_key=config.API_KEY,
+                openai_api_base=config.API_BASE_URL,
+            )
+        
+        return self._thread_local.clients[cache_key]
+
+
+# Global pool instance
+_llm_pool = LLMClientPool()
+
+
 def make_llm(temperature: float | None = None) -> ChatOpenAI:
-    effective_temp = temperature if temperature is not None else config.LLM_TEMPERATURE
-    return ChatOpenAI(
-        model=config.MODEL_NAME,
-        temperature=effective_temp,
-        openai_api_key=config.API_KEY,
-        openai_api_base=config.API_BASE_URL,
-    )
+    """Get LLM client from pool (reused per thread/temperature)."""
+    return _llm_pool.get_client(temperature)
 
 def parse_llm_json(raw_text):
     try: return json.loads(raw_text.strip())

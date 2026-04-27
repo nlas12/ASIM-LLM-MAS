@@ -21,7 +21,7 @@ LLM_TEMPERATURE: float = 0.5          # screening / analysis; mutable via CLI
 DECISION_TEMPERATURE: float = 0.1     # deterministic decisions
 
 # ── LLM provider ──────────────────────────────────────────────────────────
-MODEL_NAME: str = os.environ.get("KICONNECT_MODEL", "Mistral Small 3-2-24b Instruct KI:Inferenz.nrw")
+MODEL_NAME: str = os.environ.get("KICONNECT_MODEL", "Openai GPT OSS 120B")
 API_KEY: str | None = os.environ.get("KICONNECT_API_KEY")
 API_BASE_URL: str = "https://chat.kiconnect.nrw/api/v1"
 

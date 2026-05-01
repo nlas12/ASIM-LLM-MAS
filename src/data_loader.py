@@ -382,7 +382,7 @@ def load_dataset(load_path: str) -> tuple:
 def prepare_backtest_data(
     start_date="2014-01-01", end_date="2023-12-31", frequency="quarterly",
     n_stocks=None, wrds_window_days=10,
-    load_path: Optional[str] = None, save_path: Optional[str] = None,
+    load_path: Optional[str] = "private_results/data/backtest_data.json", save_path: Optional[str] = None,
 ):
     """
     Prepare backtest data by loading from WRDS, using synthetic data, or loading from a file.

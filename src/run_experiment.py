@@ -135,7 +135,6 @@ def _prepare_data(args):
                                                market_caps_by_period=market_caps_by_period),
         "equal_weight": build_benchmark_series(prices, periods, strategy="equal_weight", 
                                                final_valuation_prices=final_valuation_prices or None),
-        "msci_world": fetch_msci_world_index(start_date=args.start, end_date=args.end, frequency="quarterly"),
     }
     print(f"      Benchmarks computed: {list(benchmarks.keys())}")
     

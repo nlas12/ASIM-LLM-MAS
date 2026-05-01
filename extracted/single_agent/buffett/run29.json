@@ -1,0 +1,2330 @@
+{
+  "snapshots": [
+    {
+      "period": "Period_001",
+      "nav": 1000000.0,
+      "cash": 56.25000000005821,
+      "equity": 999943.75,
+      "holdings": {
+        "TICK_0E60CD": 27586,
+        "TICK_8D420B": 35425
+      },
+      "allocation": {
+        "TICK_0E60CD": {
+          "value": 599995.5,
+          "weight_pct": 60.0
+        },
+        "TICK_8D420B": {
+          "value": 399948.25,
+          "weight_pct": 39.99
+        },
+        "cash": {
+          "value": 56.25,
+          "weight_pct": 0.01
+        }
+      },
+      "concentration": {
+        "num_holdings": 2,
+        "herfindahl_index": 0.52,
+        "max_position_pct": 60.0,
+        "cash_pct": 0.01,
+        "equity_allocated_pct": 99.99
+      }
+    },
+    {
+      "period": "Period_002",
+      "nav": 1093690.09,
+      "cash": 24445.730000000058,
+      "equity": 1069244.36,
+      "holdings": {
+        "TICK_0E60CD": 26586,
+        "TICK_8D420B": 35426,
+        "TICK_F716FF": 2
+      },
+      "allocation": {
+        "TICK_0E60CD": {
+          "value": 649761.84,
+          "weight_pct": 59.41
+        },
+        "TICK_8D420B": {
+          "value": 419443.84,
+          "weight_pct": 38.35
+        },
+        "TICK_F716FF": {
+          "value": 38.68,
+          "weight_pct": 0.0
+        },
+        "cash": {
+          "value": 24445.73,
+          "weight_pct": 2.24
+        }
+      },
+      "concentration": {
+        "num_holdings": 3,
+        "herfindahl_index": 0.5,
+        "max_position_pct": 59.41,
+        "cash_pct": 2.24,
+        "equity_allocated_pct": 97.76
+      }
+    },
+    {
+      "period": "Period_003",
+      "nav": 1342014.71,
+      "cash": 1261413.65,
+      "equity": 80601.06,
+      "holdings": {
+        "TICK_0E60CD": 590,
+        "TICK_8D420B": 1000,
+        "TICK_F716FF": 1047,
+        "TICK_E79D3C": 300
+      },
+      "allocation": {
+        "TICK_0E60CD": {
+          "value": 20048.2,
+          "weight_pct": 1.49
+        },
+        "TICK_8D420B": {
+          "value": 11690.0,
+          "weight_pct": 0.87
+        },
+        "TICK_F716FF": {
+          "value": 24478.86,
+          "weight_pct": 1.82
+        },
+        "TICK_E79D3C": {
+          "value": 24384.0,
+          "weight_pct": 1.82
+        },
+        "cash": {
+          "value": 1261413.65,
+          "weight_pct": 93.99
+        }
+      },
+      "concentration": {
+        "num_holdings": 4,
+        "herfindahl_index": 0.001,
+        "max_position_pct": 1.82,
+        "cash_pct": 93.99,
+        "equity_allocated_pct": 6.01
+      }
+    },
+    {
+      "period": "Period_004",
+      "nav": 1347950.25,
+      "cash": 6.199999999775173,
+      "equity": 1347944.0500000003,
+      "holdings": {
+        "TICK_0E60CD": 590,
+        "TICK_8D420B": 1000,
+        "TICK_F716FF": 1047,
+        "TICK_F8BF53": 11946,
+        "TICK_17DC03": 2133
+      },
+      "allocation": {
+        "TICK_0E60CD": {
+          "value": 19765.0,
+          "weight_pct": 1.47
+        },
+        "TICK_8D420B": {
+          "value": 15090.0,
+          "weight_pct": 1.12
+        },
+        "TICK_F716FF": {
+          "value": 25965.6,
+          "weight_pct": 1.93
+        },
+        "TICK_F8BF53": {
+          "value": 1261378.14,
+          "weight_pct": 93.58
+        },
+        "TICK_17DC03": {
+          "value": 25745.31,
+          "weight_pct": 1.91
+        },
+        "cash": {
+          "value": 6.2,
+          "weight_pct": 0.0
+        }
+      },
+      "concentration": {
+        "num_holdings": 5,
+        "herfindahl_index": 0.8768,
+        "max_position_pct": 93.58,
+        "cash_pct": 0.0,
+        "equity_allocated_pct": 100.0
+      }
+    },
+    {
+      "period": "Period_005",
+      "nav": 1227254.8699999996,
+      "cash": 33622.27999999978,
+      "equity": 1193632.5899999999,
+      "holdings": {
+        "TICK_0E60CD": 590,
+        "TICK_8D420B": 1000,
+        "TICK_F716FF": 1047,
+        "TICK_F8BF53": 11946
+      },
+      "allocation": {
+        "TICK_0E60CD": {
+          "value": 20655.9,
+          "weight_pct": 1.68
+        },
+        "TICK_8D420B": {
+          "value": 18060.0,
+          "weight_pct": 1.47
+        },
+        "TICK_F716FF": {
+          "value": 28886.73,
+          "weight_pct": 2.35
+        },
+        "TICK_F8BF53": {
+          "value": 1126029.96,
+          "weight_pct": 91.75
+        },
+        "cash": {
+          "value": 33622.28,
+          "weight_pct": 2.74
+        }
+      },
+      "concentration": {
+        "num_holdings": 4,
+        "herfindahl_index": 0.8429,
+        "max_position_pct": 91.75,
+        "cash_pct": 2.74,
+        "equity_allocated_pct": 97.26
+      }
+    },
+    {
+      "period": "Period_006",
+      "nav": 1272281.9199999997,
+      "cash": 10.71999999978064,
+      "equity": 1272271.2,
+      "holdings": {
+        "TICK_0E60CD": 590,
+        "TICK_8D420B": 1000,
+        "TICK_F716FF": 2047,
+        "TICK_F8BF53": 11946,
+        "TICK_9C7DBB": 70,
+        "TICK_00BB14": 16
+      },
+      "allocation": {
+        "TICK_0E60CD": {
+          "value": 16006.7,
+          "weight_pct": 1.26
+        },
+        "TICK_8D420B": {
+          "value": 22770.0,
+          "weight_pct": 1.79
+        },
+        "TICK_F716FF": {
+          "value": 63579.82,
+          "weight_pct": 5.0
+        },
+        "TICK_F8BF53": {
+          "value": 1167363.12,
+          "weight_pct": 91.75
+        },
+        "TICK_9C7DBB": {
+          "value": 2350.6,
+          "weight_pct": 0.18
+        },
+        "TICK_00BB14": {
+          "value": 200.96,
+          "weight_pct": 0.02
+        },
+        "cash": {
+          "value": 10.72,
+          "weight_pct": 0.0
+        }
+      },
+      "concentration": {
+        "num_holdings": 6,
+        "herfindahl_index": 0.8448,
+        "max_position_pct": 91.75,
+        "cash_pct": 0.0,
+        "equity_allocated_pct": 100.0
+      }
+    },
+    {
+      "period": "Period_007",
+      "nav": 1486652.7299999997,
+      "cash": 10.71999999978064,
+      "equity": 1486642.01,
+      "holdings": {
+        "TICK_0E60CD": 590,
+        "TICK_8D420B": 1000,
+        "TICK_F716FF": 2047,
+        "TICK_F8BF53": 11946,
+        "TICK_9C7DBB": 70,
+        "TICK_00BB14": 16
+      },
+      "allocation": {
+        "TICK_0E60CD": {
+          "value": 11080.2,
+          "weight_pct": 0.75
+        },
+        "TICK_8D420B": {
+          "value": 22420.0,
+          "weight_pct": 1.51
+        },
+        "TICK_F716FF": {
+          "value": 64787.55,
+          "weight_pct": 4.36
+        },
+        "TICK_F8BF53": {
+          "value": 1385855.46,
+          "weight_pct": 93.22
+        },
+        "TICK_9C7DBB": {
+          "value": 2282.0,
+          "weight_pct": 0.15
+        },
+        "TICK_00BB14": {
+          "value": 216.8,
+          "weight_pct": 0.01
+        },
+        "cash": {
+          "value": 10.72,
+          "weight_pct": 0.0
+        }
+      },
+      "concentration": {
+        "num_holdings": 6,
+        "herfindahl_index": 0.8712,
+        "max_position_pct": 93.22,
+        "cash_pct": 0.0,
+        "equity_allocated_pct": 100.0
+      }
+    },
+    {
+      "period": "Period_008",
+      "nav": 1263195.1299999997,
+      "cash": 1914.7199999997806,
+      "equity": 1261280.41,
+      "holdings": {
+        "TICK_0E60CD": 590,
+        "TICK_8D420B": 1000,
+        "TICK_F716FF": 2047,
+        "TICK_F8BF53": 11946,
+        "TICK_00BB14": 16
+      },
+      "allocation": {
+        "TICK_0E60CD": {
+          "value": 8714.3,
+          "weight_pct": 0.69
+        },
+        "TICK_8D420B": {
+          "value": 22370.0,
+          "weight_pct": 1.77
+        },
+        "TICK_F716FF": {
+          "value": 56067.33,
+          "weight_pct": 4.44
+        },
+        "TICK_F8BF53": {
+          "value": 1173933.42,
+          "weight_pct": 92.93
+        },
+        "TICK_00BB14": {
+          "value": 195.36,
+          "weight_pct": 0.02
+        },
+        "cash": {
+          "value": 1914.72,
+          "weight_pct": 0.15
+        }
+      },
+      "concentration": {
+        "num_holdings": 5,
+        "herfindahl_index": 0.866,
+        "max_position_pct": 92.93,
+        "cash_pct": 0.15,
+        "equity_allocated_pct": 99.85
+      }
+    },
+    {
+      "period": "Period_009",
+      "nav": 1298024.0599999998,
+      "cash": 10269.11999999978,
+      "equity": 1287754.94,
+      "holdings": {
+        "TICK_8D420B": 1000,
+        "TICK_F716FF": 2047,
+        "TICK_F8BF53": 11946,
+        "TICK_00BB14": 16
+      },
+      "allocation": {
+        "TICK_8D420B": {
+          "value": 24830.0,
+          "weight_pct": 1.91
+        },
+        "TICK_F716FF": {
+          "value": 53877.04,
+          "weight_pct": 4.15
+        },
+        "TICK_F8BF53": {
+          "value": 1208815.74,
+          "weight_pct": 93.13
+        },
+        "TICK_00BB14": {
+          "value": 232.16,
+          "weight_pct": 0.02
+        },
+        "cash": {
+          "value": 10269.12,
+          "weight_pct": 0.79
+        }
+      },
+      "concentration": {
+        "num_holdings": 4,
+        "herfindahl_index": 0.8694,
+        "max_position_pct": 93.13,
+        "cash_pct": 0.79,
+        "equity_allocated_pct": 99.21
+      }
+    },
+    {
+      "period": "Period_010",
+      "nav": 1213631.6199999999,
+      "cash": 23.54999999978091,
+      "equity": 1213608.07,
+      "holdings": {
+        "TICK_8D420B": 1000,
+        "TICK_F716FF": 2047,
+        "TICK_F8BF53": 11946,
+        "TICK_00BB14": 16,
+        "TICK_7B57FC": 53,
+        "TICK_55F196": 4
+      },
+      "allocation": {
+        "TICK_8D420B": {
+          "value": 22460.0,
+          "weight_pct": 1.85
+        },
+        "TICK_F716FF": {
+          "value": 56292.5,
+          "weight_pct": 4.64
+        },
+        "TICK_F8BF53": {
+          "value": 1124357.52,
+          "weight_pct": 92.64
+        },
+        "TICK_00BB14": {
+          "value": 252.48,
+          "weight_pct": 0.02
+        },
+        "TICK_7B57FC": {
+          "value": 10087.49,
+          "weight_pct": 0.83
+        },
+        "TICK_55F196": {
+          "value": 158.08,
+          "weight_pct": 0.01
+        },
+        "cash": {
+          "value": 23.55,
+          "weight_pct": 0.0
+        }
+      },
+      "concentration": {
+        "num_holdings": 6,
+        "herfindahl_index": 0.8609,
+        "max_position_pct": 92.64,
+        "cash_pct": 0.0,
+        "equity_allocated_pct": 100.0
+      }
+    },
+    {
+      "period": "Period_011",
+      "nav": 1098566.8099999998,
+      "cash": 270.2699999997809,
+      "equity": 1098296.54,
+      "holdings": {
+        "TICK_8D420B": 1000,
+        "TICK_F716FF": 2047,
+        "TICK_F8BF53": 11946,
+        "TICK_7B57FC": 53,
+        "TICK_55F196": 4
+      },
+      "allocation": {
+        "TICK_8D420B": {
+          "value": 26620.0,
+          "weight_pct": 2.42
+        },
+        "TICK_F716FF": {
+          "value": 49066.59,
+          "weight_pct": 4.47
+        },
+        "TICK_F8BF53": {
+          "value": 1013737.56,
+          "weight_pct": 92.28
+        },
+        "TICK_7B57FC": {
+          "value": 8755.07,
+          "weight_pct": 0.8
+        },
+        "TICK_55F196": {
+          "value": 117.32,
+          "weight_pct": 0.01
+        },
+        "cash": {
+          "value": 270.27,
+          "weight_pct": 0.02
+        }
+      },
+      "concentration": {
+        "num_holdings": 5,
+        "herfindahl_index": 0.8542,
+        "max_position_pct": 92.28,
+        "cash_pct": 0.02,
+        "equity_allocated_pct": 99.98
+      }
+    },
+    {
+      "period": "Period_012",
+      "nav": 1037552.1599999998,
+      "cash": 9679.17999999978,
+      "equity": 1027872.98,
+      "holdings": {
+        "TICK_8D420B": 1000,
+        "TICK_F716FF": 2047,
+        "TICK_F8BF53": 11946,
+        "TICK_55F196": 4,
+        "TICK_4AF927": 5
+      },
+      "allocation": {
+        "TICK_8D420B": {
+          "value": 24470.0,
+          "weight_pct": 2.36
+        },
+        "TICK_F716FF": {
+          "value": 57848.22,
+          "weight_pct": 5.58
+        },
+        "TICK_F8BF53": {
+          "value": 945167.52,
+          "weight_pct": 91.1
+        },
+        "TICK_55F196": {
+          "value": 146.44,
+          "weight_pct": 0.01
+        },
+        "TICK_4AF927": {
+          "value": 240.8,
+          "weight_pct": 0.02
+        },
+        "cash": {
+          "value": 9679.18,
+          "weight_pct": 0.93
+        }
+      },
+      "concentration": {
+        "num_holdings": 5,
+        "herfindahl_index": 0.8335,
+        "max_position_pct": 91.1,
+        "cash_pct": 0.93,
+        "equity_allocated_pct": 99.07
+      }
+    },
+    {
+      "period": "Period_013",
+      "nav": 946964.9999999998,
+      "cash": 187.1899999997804,
+      "equity": 946777.8099999999,
+      "holdings": {
+        "TICK_8D420B": 1000,
+        "TICK_F716FF": 2047,
+        "TICK_F8BF53": 11946,
+        "TICK_4AF927": 5,
+        "TICK_48C6EE": 3625
+      },
+      "allocation": {
+        "TICK_8D420B": {
+          "value": 22170.0,
+          "weight_pct": 2.34
+        },
+        "TICK_F716FF": {
+          "value": 59260.65,
+          "weight_pct": 6.26
+        },
+        "TICK_F8BF53": {
+          "value": 855453.06,
+          "weight_pct": 90.34
+        },
+        "TICK_4AF927": {
+          "value": 215.35,
+          "weight_pct": 0.02
+        },
+        "TICK_48C6EE": {
+          "value": 9678.75,
+          "weight_pct": 1.02
+        },
+        "cash": {
+          "value": 187.19,
+          "weight_pct": 0.02
+        }
+      },
+      "concentration": {
+        "num_holdings": 5,
+        "herfindahl_index": 0.8206,
+        "max_position_pct": 90.34,
+        "cash_pct": 0.02,
+        "equity_allocated_pct": 99.98
+      }
+    },
+    {
+      "period": "Period_014",
+      "nav": 918301.2799999998,
+      "cash": 2.2299999997804036,
+      "equity": 918299.05,
+      "holdings": {
+        "TICK_8D420B": 1000,
+        "TICK_F716FF": 2047,
+        "TICK_F8BF53": 11946,
+        "TICK_4AF927": 5,
+        "TICK_48C6EE": 3693
+      },
+      "allocation": {
+        "TICK_8D420B": {
+          "value": 23090.0,
+          "weight_pct": 2.51
+        },
+        "TICK_F716FF": {
+          "value": 73507.77,
+          "weight_pct": 8.0
+        },
+        "TICK_F8BF53": {
+          "value": 811372.32,
+          "weight_pct": 88.36
+        },
+        "TICK_4AF927": {
+          "value": 284.0,
+          "weight_pct": 0.03
+        },
+        "TICK_48C6EE": {
+          "value": 10044.96,
+          "weight_pct": 1.09
+        },
+        "cash": {
+          "value": 2.23,
+          "weight_pct": 0.0
+        }
+      },
+      "concentration": {
+        "num_holdings": 5,
+        "herfindahl_index": 0.7878,
+        "max_position_pct": 88.36,
+        "cash_pct": 0.0,
+        "equity_allocated_pct": 100.0
+      }
+    },
+    {
+      "period": "Period_015",
+      "nav": 957724.9599999997,
+      "cash": 845540.1099999998,
+      "equity": 112184.84999999999,
+      "holdings": {
+        "TICK_8D420B": 1000,
+        "TICK_F716FF": 2047,
+        "TICK_4AF927": 5,
+        "TICK_48C6EE": 3693
+      },
+      "allocation": {
+        "TICK_8D420B": {
+          "value": 24840.0,
+          "weight_pct": 2.59
+        },
+        "TICK_F716FF": {
+          "value": 73712.47,
+          "weight_pct": 7.7
+        },
+        "TICK_4AF927": {
+          "value": 300.65,
+          "weight_pct": 0.03
+        },
+        "TICK_48C6EE": {
+          "value": 13331.73,
+          "weight_pct": 1.39
+        },
+        "cash": {
+          "value": 845540.11,
+          "weight_pct": 88.29
+        }
+      },
+      "concentration": {
+        "num_holdings": 4,
+        "herfindahl_index": 0.0068,
+        "max_position_pct": 7.7,
+        "cash_pct": 88.29,
+        "equity_allocated_pct": 11.71
+      }
+    },
+    {
+      "period": "Period_016",
+      "nav": 968802.5299999998,
+      "cash": 116.96999999979744,
+      "equity": 968685.56,
+      "holdings": {
+        "TICK_8D420B": 1000,
+        "TICK_F716FF": 2047,
+        "TICK_4AF927": 4812,
+        "TICK_48C6EE": 3693,
+        "TICK_0E60CD": 9674,
+        "TICK_6CCA09": 1790
+      },
+      "allocation": {
+        "TICK_8D420B": {
+          "value": 27620.0,
+          "weight_pct": 2.85
+        },
+        "TICK_F716FF": {
+          "value": 78870.91,
+          "weight_pct": 8.14
+        },
+        "TICK_4AF927": {
+          "value": 253881.12,
+          "weight_pct": 26.21
+        },
+        "TICK_48C6EE": {
+          "value": 16507.71,
+          "weight_pct": 1.7
+        },
+        "TICK_0E60CD": {
+          "value": 380478.42,
+          "weight_pct": 39.27
+        },
+        "TICK_6CCA09": {
+          "value": 211327.4,
+          "weight_pct": 21.81
+        },
+        "cash": {
+          "value": 116.97,
+          "weight_pct": 0.01
+        }
+      },
+      "concentration": {
+        "num_holdings": 6,
+        "herfindahl_index": 0.2782,
+        "max_position_pct": 39.27,
+        "cash_pct": 0.01,
+        "equity_allocated_pct": 99.99
+      }
+    },
+    {
+      "period": "Period_017",
+      "nav": 1054168.0599999998,
+      "cash": 15.349999999797447,
+      "equity": 1054152.71,
+      "holdings": {
+        "TICK_8D420B": 1000,
+        "TICK_F716FF": 2047,
+        "TICK_4AF927": 4812,
+        "TICK_48C6EE": 3693,
+        "TICK_0E60CD": 9674,
+        "TICK_6CCA09": 1789,
+        "TICK_466528": 1,
+        "TICK_8CA351": 2
+      },
+      "allocation": {
+        "TICK_8D420B": {
+          "value": 31640.0,
+          "weight_pct": 3.0
+        },
+        "TICK_F716FF": {
+          "value": 86608.57,
+          "weight_pct": 8.22
+        },
+        "TICK_4AF927": {
+          "value": 332076.12,
+          "weight_pct": 31.5
+        },
+        "TICK_48C6EE": {
+          "value": 17874.12,
+          "weight_pct": 1.7
+        },
+        "TICK_0E60CD": {
+          "value": 397794.88,
+          "weight_pct": 37.74
+        },
+        "TICK_6CCA09": {
+          "value": 187952.34,
+          "weight_pct": 17.83
+        },
+        "TICK_466528": {
+          "value": 104.44,
+          "weight_pct": 0.01
+        },
+        "TICK_8CA351": {
+          "value": 102.24,
+          "weight_pct": 0.01
+        },
+        "cash": {
+          "value": 15.35,
+          "weight_pct": 0.0
+        }
+      },
+      "concentration": {
+        "num_holdings": 8,
+        "herfindahl_index": 0.2814,
+        "max_position_pct": 37.74,
+        "cash_pct": 0.0,
+        "equity_allocated_pct": 100.0
+      }
+    },
+    {
+      "period": "Period_018",
+      "nav": 1127252.2599999998,
+      "cash": 217128.8199999998,
+      "equity": 910123.44,
+      "holdings": {
+        "TICK_8D420B": 1000,
+        "TICK_F716FF": 2047,
+        "TICK_4AF927": 4812,
+        "TICK_48C6EE": 3693,
+        "TICK_0E60CD": 9674
+      },
+      "allocation": {
+        "TICK_8D420B": {
+          "value": 28610.0,
+          "weight_pct": 2.54
+        },
+        "TICK_F716FF": {
+          "value": 85871.65,
+          "weight_pct": 7.62
+        },
+        "TICK_4AF927": {
+          "value": 269856.96,
+          "weight_pct": 23.94
+        },
+        "TICK_48C6EE": {
+          "value": 21382.47,
+          "weight_pct": 1.9
+        },
+        "TICK_0E60CD": {
+          "value": 504402.36,
+          "weight_pct": 44.75
+        },
+        "cash": {
+          "value": 217128.82,
+          "weight_pct": 19.26
+        }
+      },
+      "concentration": {
+        "num_holdings": 5,
+        "herfindahl_index": 0.2643,
+        "max_position_pct": 44.75,
+        "cash_pct": 19.26,
+        "equity_allocated_pct": 80.74
+      }
+    },
+    {
+      "period": "Period_019",
+      "nav": 1112831.4599999997,
+      "cash": 1207.9799999998195,
+      "equity": 1111623.48,
+      "holdings": {
+        "TICK_8D420B": 1000,
+        "TICK_F716FF": 3547,
+        "TICK_48C6EE": 33693,
+        "TICK_0E60CD": 9674,
+        "TICK_E79D3C": 800,
+        "TICK_8CA351": 800,
+        "TICK_3426FB": 60
+      },
+      "allocation": {
+        "TICK_8D420B": {
+          "value": 28650.0,
+          "weight_pct": 2.57
+        },
+        "TICK_F716FF": {
+          "value": 164155.16,
+          "weight_pct": 14.75
+        },
+        "TICK_48C6EE": {
+          "value": 199462.56,
+          "weight_pct": 17.92
+        },
+        "TICK_0E60CD": {
+          "value": 507304.56,
+          "weight_pct": 45.59
+        },
+        "TICK_E79D3C": {
+          "value": 163440.0,
+          "weight_pct": 14.69
+        },
+        "TICK_8CA351": {
+          "value": 36952.0,
+          "weight_pct": 3.32
+        },
+        "TICK_3426FB": {
+          "value": 11659.2,
+          "weight_pct": 1.05
+        },
+        "cash": {
+          "value": 1207.98,
+          "weight_pct": 0.11
+        }
+      },
+      "concentration": {
+        "num_holdings": 7,
+        "herfindahl_index": 0.2851,
+        "max_position_pct": 45.59,
+        "cash_pct": 0.11,
+        "equity_allocated_pct": 99.89
+      }
+    },
+    {
+      "period": "Period_020",
+      "nav": 1134368.94,
+      "cash": 176245.3799999998,
+      "equity": 958123.56,
+      "holdings": {
+        "TICK_8D420B": 1000,
+        "TICK_F716FF": 3568,
+        "TICK_48C6EE": 33860,
+        "TICK_0E60CD": 9700,
+        "TICK_8CA351": 800,
+        "TICK_3426FB": 60,
+        "TICK_15900B": 80,
+        "TICK_0A4917": 25,
+        "TICK_BD11C7": 41
+      },
+      "allocation": {
+        "TICK_8D420B": {
+          "value": 28680.0,
+          "weight_pct": 2.53
+        },
+        "TICK_F716FF": {
+          "value": 202698.08,
+          "weight_pct": 17.87
+        },
+        "TICK_48C6EE": {
+          "value": 244807.8,
+          "weight_pct": 21.58
+        },
+        "TICK_0E60CD": {
+          "value": 437955.0,
+          "weight_pct": 38.61
+        },
+        "TICK_8CA351": {
+          "value": 30672.0,
+          "weight_pct": 2.7
+        },
+        "TICK_3426FB": {
+          "value": 9746.4,
+          "weight_pct": 0.86
+        },
+        "TICK_15900B": {
+          "value": 1201.6,
+          "weight_pct": 0.11
+        },
+        "TICK_0A4917": {
+          "value": 1174.5,
+          "weight_pct": 0.1
+        },
+        "TICK_BD11C7": {
+          "value": 1188.18,
+          "weight_pct": 0.1
+        },
+        "cash": {
+          "value": 176245.38,
+          "weight_pct": 15.54
+        }
+      },
+      "concentration": {
+        "num_holdings": 9,
+        "herfindahl_index": 0.229,
+        "max_position_pct": 38.61,
+        "cash_pct": 15.54,
+        "equity_allocated_pct": 84.46
+      }
+    },
+    {
+      "period": "Period_021",
+      "nav": 798669.4399999996,
+      "cash": 647.6099999997969,
+      "equity": 798021.8299999998,
+      "holdings": {
+        "TICK_8D420B": 1000,
+        "TICK_F716FF": 3568,
+        "TICK_48C6EE": 33860,
+        "TICK_0E60CD": 9700,
+        "TICK_3426FB": 151,
+        "TICK_15900B": 80,
+        "TICK_0A4917": 25,
+        "TICK_BD11C7": 41,
+        "TICK_3C7F40": 1091,
+        "TICK_831B44": 426,
+        "TICK_98381A": 166,
+        "TICK_7B57FC": 252
+      },
+      "allocation": {
+        "TICK_8D420B": {
+          "value": 24610.0,
+          "weight_pct": 3.08
+        },
+        "TICK_F716FF": {
+          "value": 140721.92,
+          "weight_pct": 17.62
+        },
+        "TICK_48C6EE": {
+          "value": 113092.4,
+          "weight_pct": 14.16
+        },
+        "TICK_0E60CD": {
+          "value": 307781.0,
+          "weight_pct": 38.54
+        },
+        "TICK_3426FB": {
+          "value": 19794.59,
+          "weight_pct": 2.48
+        },
+        "TICK_15900B": {
+          "value": 1089.6,
+          "weight_pct": 0.14
+        },
+        "TICK_0A4917": {
+          "value": 0.0,
+          "weight_pct": 0.0
+        },
+        "TICK_BD11C7": {
+          "value": 1071.74,
+          "weight_pct": 0.13
+        },
+        "TICK_3C7F40": {
+          "value": 79948.48,
+          "weight_pct": 10.01
+        },
+        "TICK_831B44": {
+          "value": 19992.18,
+          "weight_pct": 2.5
+        },
+        "TICK_98381A": {
+          "value": 49952.72,
+          "weight_pct": 6.25
+        },
+        "TICK_7B57FC": {
+          "value": 39967.2,
+          "weight_pct": 5.0
+        },
+        "cash": {
+          "value": 647.61,
+          "weight_pct": 0.08
+        }
+      },
+      "concentration": {
+        "num_holdings": 12,
+        "herfindahl_index": 0.2182,
+        "max_position_pct": 38.54,
+        "cash_pct": 0.08,
+        "equity_allocated_pct": 99.92
+      }
+    },
+    {
+      "period": "Period_022",
+      "nav": 998135.3799999998,
+      "cash": 0.6099999997967984,
+      "equity": 998134.77,
+      "holdings": {
+        "TICK_8D420B": 1000,
+        "TICK_F716FF": 3569,
+        "TICK_48C6EE": 33869,
+        "TICK_0E60CD": 9700,
+        "TICK_3426FB": 151,
+        "TICK_15900B": 80,
+        "TICK_0A4917": 25,
+        "TICK_BD11C7": 41,
+        "TICK_3C7F40": 1091,
+        "TICK_831B44": 426,
+        "TICK_98381A": 166,
+        "TICK_7B57FC": 252,
+        "TICK_1E092A": 3
+      },
+      "allocation": {
+        "TICK_8D420B": {
+          "value": 26640.0,
+          "weight_pct": 2.67
+        },
+        "TICK_F716FF": {
+          "value": 170633.89,
+          "weight_pct": 17.1
+        },
+        "TICK_48C6EE": {
+          "value": 154442.64,
+          "weight_pct": 15.47
+        },
+        "TICK_0E60CD": {
+          "value": 409825.0,
+          "weight_pct": 41.06
+        },
+        "TICK_3426FB": {
+          "value": 25473.7,
+          "weight_pct": 2.55
+        },
+        "TICK_15900B": {
+          "value": 1477.6,
+          "weight_pct": 0.15
+        },
+        "TICK_0A4917": {
+          "value": 0.0,
+          "weight_pct": 0.0
+        },
+        "TICK_BD11C7": {
+          "value": 1348.9,
+          "weight_pct": 0.14
+        },
+        "TICK_3C7F40": {
+          "value": 102979.49,
+          "weight_pct": 10.32
+        },
+        "TICK_831B44": {
+          "value": 23221.26,
+          "weight_pct": 2.33
+        },
+        "TICK_98381A": {
+          "value": 38593.34,
+          "weight_pct": 3.87
+        },
+        "TICK_7B57FC": {
+          "value": 42940.8,
+          "weight_pct": 4.3
+        },
+        "TICK_1E092A": {
+          "value": 558.15,
+          "weight_pct": 0.06
+        },
+        "cash": {
+          "value": 0.61,
+          "weight_pct": 0.0
+        }
+      },
+      "concentration": {
+        "num_holdings": 13,
+        "herfindahl_index": 0.2377,
+        "max_position_pct": 41.06,
+        "cash_pct": 0.0,
+        "equity_allocated_pct": 100.0
+      }
+    },
+    {
+      "period": "Period_023",
+      "nav": 972715.73,
+      "cash": 556961.8499999999,
+      "equity": 415753.88000000006,
+      "holdings": {
+        "TICK_8D420B": 1000,
+        "TICK_F716FF": 3569,
+        "TICK_48C6EE": 33869,
+        "TICK_15900B": 80,
+        "TICK_0A4917": 25,
+        "TICK_BD11C7": 41,
+        "TICK_831B44": 426,
+        "TICK_98381A": 166,
+        "TICK_1E092A": 3
+      },
+      "allocation": {
+        "TICK_8D420B": {
+          "value": 32380.0,
+          "weight_pct": 3.33
+        },
+        "TICK_F716FF": {
+          "value": 179841.91,
+          "weight_pct": 18.49
+        },
+        "TICK_48C6EE": {
+          "value": 140556.35,
+          "weight_pct": 14.45
+        },
+        "TICK_15900B": {
+          "value": 1530.4,
+          "weight_pct": 0.16
+        },
+        "TICK_0A4917": {
+          "value": 0.0,
+          "weight_pct": 0.0
+        },
+        "TICK_BD11C7": {
+          "value": 1339.06,
+          "weight_pct": 0.14
+        },
+        "TICK_831B44": {
+          "value": 20469.3,
+          "weight_pct": 2.1
+        },
+        "TICK_98381A": {
+          "value": 39091.34,
+          "weight_pct": 4.02
+        },
+        "TICK_1E092A": {
+          "value": 545.52,
+          "weight_pct": 0.06
+        },
+        "cash": {
+          "value": 556961.85,
+          "weight_pct": 57.26
+        }
+      },
+      "concentration": {
+        "num_holdings": 9,
+        "herfindahl_index": 0.0582,
+        "max_position_pct": 18.49,
+        "cash_pct": 57.26,
+        "equity_allocated_pct": 42.74
+      }
+    },
+    {
+      "period": "Period_024",
+      "nav": 995864.2199999999,
+      "cash": 149744.93999999983,
+      "equity": 846119.28,
+      "holdings": {
+        "TICK_8D420B": 1000,
+        "TICK_F716FF": 3569,
+        "TICK_0A4917": 25,
+        "TICK_BD11C7": 41,
+        "TICK_831B44": 426,
+        "TICK_98381A": 166,
+        "TICK_6CCA09": 5756
+      },
+      "allocation": {
+        "TICK_8D420B": {
+          "value": 28210.0,
+          "weight_pct": 2.83
+        },
+        "TICK_F716FF": {
+          "value": 200399.35,
+          "weight_pct": 20.12
+        },
+        "TICK_0A4917": {
+          "value": 0.0,
+          "weight_pct": 0.0
+        },
+        "TICK_BD11C7": {
+          "value": 1277.97,
+          "weight_pct": 0.13
+        },
+        "TICK_831B44": {
+          "value": 21623.76,
+          "weight_pct": 2.17
+        },
+        "TICK_98381A": {
+          "value": 37715.2,
+          "weight_pct": 3.79
+        },
+        "TICK_6CCA09": {
+          "value": 556893.0,
+          "weight_pct": 55.92
+        },
+        "cash": {
+          "value": 149744.94,
+          "weight_pct": 15.04
+        }
+      },
+      "concentration": {
+        "num_holdings": 7,
+        "herfindahl_index": 0.3559,
+        "max_position_pct": 55.92,
+        "cash_pct": 15.04,
+        "equity_allocated_pct": 84.96
+      }
+    },
+    {
+      "period": "Period_025",
+      "nav": 1138611.0199999998,
+      "cash": 251.04999999984284,
+      "equity": 1138359.97,
+      "holdings": {
+        "TICK_F716FF": 4058,
+        "TICK_0A4917": 25,
+        "TICK_831B44": 426,
+        "TICK_98381A": 661,
+        "TICK_6CCA09": 5756
+      },
+      "allocation": {
+        "TICK_F716FF": {
+          "value": 297897.78,
+          "weight_pct": 26.16
+        },
+        "TICK_0A4917": {
+          "value": 0.0,
+          "weight_pct": 0.0
+        },
+        "TICK_831B44": {
+          "value": 25496.1,
+          "weight_pct": 2.24
+        },
+        "TICK_98381A": {
+          "value": 196138.53,
+          "weight_pct": 17.23
+        },
+        "TICK_6CCA09": {
+          "value": 618827.56,
+          "weight_pct": 54.35
+        },
+        "cash": {
+          "value": 251.05,
+          "weight_pct": 0.02
+        }
+      },
+      "concentration": {
+        "num_holdings": 5,
+        "herfindahl_index": 0.394,
+        "max_position_pct": 54.35,
+        "cash_pct": 0.02,
+        "equity_allocated_pct": 99.98
+      }
+    },
+    {
+      "period": "Period_026",
+      "nav": 1021999.4199999998,
+      "cash": 1.7699999998428382,
+      "equity": 1021997.65,
+      "holdings": {
+        "TICK_F716FF": 4058,
+        "TICK_0A4917": 25,
+        "TICK_831B44": 426,
+        "TICK_98381A": 661,
+        "TICK_6CCA09": 5756,
+        "TICK_48C6EE": 41
+      },
+      "allocation": {
+        "TICK_F716FF": {
+          "value": 244413.34,
+          "weight_pct": 23.92
+        },
+        "TICK_0A4917": {
+          "value": 0.0,
+          "weight_pct": 0.0
+        },
+        "TICK_831B44": {
+          "value": 22100.88,
+          "weight_pct": 2.16
+        },
+        "TICK_98381A": {
+          "value": 193851.47,
+          "weight_pct": 18.97
+        },
+        "TICK_6CCA09": {
+          "value": 561382.68,
+          "weight_pct": 54.93
+        },
+        "TICK_48C6EE": {
+          "value": 249.28,
+          "weight_pct": 0.02
+        },
+        "cash": {
+          "value": 1.77,
+          "weight_pct": 0.0
+        }
+      },
+      "concentration": {
+        "num_holdings": 6,
+        "herfindahl_index": 0.3954,
+        "max_position_pct": 54.93,
+        "cash_pct": 0.0,
+        "equity_allocated_pct": 100.0
+      }
+    },
+    {
+      "period": "Period_027",
+      "nav": 1348184.5899999996,
+      "cash": 1.7699999998428382,
+      "equity": 1348182.8199999998,
+      "holdings": {
+        "TICK_F716FF": 4058,
+        "TICK_0A4917": 25,
+        "TICK_831B44": 426,
+        "TICK_98381A": 661,
+        "TICK_6CCA09": 5756,
+        "TICK_48C6EE": 41
+      },
+      "allocation": {
+        "TICK_F716FF": {
+          "value": 369399.74,
+          "weight_pct": 27.4
+        },
+        "TICK_0A4917": {
+          "value": 0.0,
+          "weight_pct": 0.0
+        },
+        "TICK_831B44": {
+          "value": 25053.06,
+          "weight_pct": 1.86
+        },
+        "TICK_98381A": {
+          "value": 175012.97,
+          "weight_pct": 12.98
+        },
+        "TICK_6CCA09": {
+          "value": 778326.32,
+          "weight_pct": 57.73
+        },
+        "TICK_48C6EE": {
+          "value": 390.73,
+          "weight_pct": 0.03
+        },
+        "cash": {
+          "value": 1.77,
+          "weight_pct": 0.0
+        }
+      },
+      "concentration": {
+        "num_holdings": 6,
+        "herfindahl_index": 0.4256,
+        "max_position_pct": 57.73,
+        "cash_pct": 0.0,
+        "equity_allocated_pct": 100.0
+      }
+    },
+    {
+      "period": "Period_028",
+      "nav": 1449791.2899999998,
+      "cash": 1.7699999998428382,
+      "equity": 1449789.52,
+      "holdings": {
+        "TICK_F716FF": 4058,
+        "TICK_0A4917": 25,
+        "TICK_831B44": 426,
+        "TICK_98381A": 661,
+        "TICK_6CCA09": 5756,
+        "TICK_48C6EE": 41
+      },
+      "allocation": {
+        "TICK_F716FF": {
+          "value": 473933.82,
+          "weight_pct": 32.69
+        },
+        "TICK_0A4917": {
+          "value": 0.0,
+          "weight_pct": 0.0
+        },
+        "TICK_831B44": {
+          "value": 22254.24,
+          "weight_pct": 1.53
+        },
+        "TICK_98381A": {
+          "value": 188761.77,
+          "weight_pct": 13.02
+        },
+        "TICK_6CCA09": {
+          "value": 764281.68,
+          "weight_pct": 52.72
+        },
+        "TICK_48C6EE": {
+          "value": 558.01,
+          "weight_pct": 0.04
+        },
+        "cash": {
+          "value": 1.77,
+          "weight_pct": 0.0
+        }
+      },
+      "concentration": {
+        "num_holdings": 6,
+        "herfindahl_index": 0.402,
+        "max_position_pct": 52.72,
+        "cash_pct": 0.0,
+        "equity_allocated_pct": 100.0
+      }
+    },
+    {
+      "period": "Period_029",
+      "nav": 1548630.6299999997,
+      "cash": 1365019.3899999997,
+      "equity": 183611.24000000002,
+      "holdings": {
+        "TICK_0A4917": 25,
+        "TICK_831B44": 426,
+        "TICK_98381A": 661,
+        "TICK_48C6EE": 41
+      },
+      "allocation": {
+        "TICK_0A4917": {
+          "value": 0.0,
+          "weight_pct": 0.0
+        },
+        "TICK_831B44": {
+          "value": 21223.32,
+          "weight_pct": 1.37
+        },
+        "TICK_98381A": {
+          "value": 161852.46,
+          "weight_pct": 10.45
+        },
+        "TICK_48C6EE": {
+          "value": 535.46,
+          "weight_pct": 0.03
+        },
+        "cash": {
+          "value": 1365019.39,
+          "weight_pct": 88.14
+        }
+      },
+      "concentration": {
+        "num_holdings": 4,
+        "herfindahl_index": 0.0111,
+        "max_position_pct": 10.45,
+        "cash_pct": 88.14,
+        "equity_allocated_pct": 11.86
+      }
+    },
+    {
+      "period": "Period_030",
+      "nav": 1577311.21,
+      "cash": 934.2099999999045,
+      "equity": 1576377.0,
+      "holdings": {
+        "TICK_0A4917": 25,
+        "TICK_831B44": 426,
+        "TICK_48C6EE": 41,
+        "TICK_C20370": 3634,
+        "TICK_9FD59A": 4236,
+        "TICK_A8486B": 2062,
+        "TICK_B5BBB3": 4775
+      },
+      "allocation": {
+        "TICK_0A4917": {
+          "value": 0.0,
+          "weight_pct": 0.0
+        },
+        "TICK_831B44": {
+          "value": 27498.3,
+          "weight_pct": 1.74
+        },
+        "TICK_48C6EE": {
+          "value": 566.21,
+          "weight_pct": 0.04
+        },
+        "TICK_C20370": {
+          "value": 386984.66,
+          "weight_pct": 24.53
+        },
+        "TICK_9FD59A": {
+          "value": 387085.68,
+          "weight_pct": 24.54
+        },
+        "TICK_A8486B": {
+          "value": 387037.4,
+          "weight_pct": 24.54
+        },
+        "TICK_B5BBB3": {
+          "value": 387204.75,
+          "weight_pct": 24.55
+        },
+        "cash": {
+          "value": 934.21,
+          "weight_pct": 0.06
+        }
+      },
+      "concentration": {
+        "num_holdings": 7,
+        "herfindahl_index": 0.2412,
+        "max_position_pct": 24.55,
+        "cash_pct": 0.06,
+        "equity_allocated_pct": 99.94
+      }
+    },
+    {
+      "period": "Period_031",
+      "nav": 1757887.4699999997,
+      "cash": 106737.5699999999,
+      "equity": 1651149.9,
+      "holdings": {
+        "TICK_0A4917": 25,
+        "TICK_831B44": 426,
+        "TICK_48C6EE": 41,
+        "TICK_C20370": 3634,
+        "TICK_9FD59A": 3236,
+        "TICK_A8486B": 2062,
+        "TICK_B5BBB3": 4775,
+        "TICK_7B57FC": 4,
+        "TICK_90531B": 3
+      },
+      "allocation": {
+        "TICK_0A4917": {
+          "value": 0.0,
+          "weight_pct": 0.0
+        },
+        "TICK_831B44": {
+          "value": 23860.26,
+          "weight_pct": 1.36
+        },
+        "TICK_48C6EE": {
+          "value": 828.61,
+          "weight_pct": 0.05
+        },
+        "TICK_C20370": {
+          "value": 444946.96,
+          "weight_pct": 25.31
+        },
+        "TICK_9FD59A": {
+          "value": 345313.56,
+          "weight_pct": 19.64
+        },
+        "TICK_A8486B": {
+          "value": 389738.62,
+          "weight_pct": 22.17
+        },
+        "TICK_B5BBB3": {
+          "value": 445555.25,
+          "weight_pct": 25.35
+        },
+        "TICK_7B57FC": {
+          "value": 805.84,
+          "weight_pct": 0.05
+        },
+        "TICK_90531B": {
+          "value": 100.8,
+          "weight_pct": 0.01
+        },
+        "cash": {
+          "value": 106737.57,
+          "weight_pct": 6.07
+        }
+      },
+      "concentration": {
+        "num_holdings": 9,
+        "herfindahl_index": 0.2162,
+        "max_position_pct": 25.35,
+        "cash_pct": 6.07,
+        "equity_allocated_pct": 93.93
+      }
+    },
+    {
+      "period": "Period_032",
+      "nav": 1899516.9599999997,
+      "cash": 0.5099999999692955,
+      "equity": 1899516.4499999997,
+      "holdings": {
+        "TICK_0A4917": 25,
+        "TICK_831B44": 426,
+        "TICK_48C6EE": 41,
+        "TICK_C20370": 3634,
+        "TICK_A8486B": 2062,
+        "TICK_B5BBB3": 4775,
+        "TICK_90531B": 3,
+        "TICK_0258B6": 1526,
+        "TICK_F2AD88": 186,
+        "TICK_466528": 550,
+        "TICK_0E60CD": 1503,
+        "TICK_8CA351": 826,
+        "TICK_4F476A": 151
+      },
+      "allocation": {
+        "TICK_0A4917": {
+          "value": 0.0,
+          "weight_pct": 0.0
+        },
+        "TICK_831B44": {
+          "value": 22944.36,
+          "weight_pct": 1.21
+        },
+        "TICK_48C6EE": {
+          "value": 850.34,
+          "weight_pct": 0.04
+        },
+        "TICK_C20370": {
+          "value": 496186.36,
+          "weight_pct": 26.12
+        },
+        "TICK_A8486B": {
+          "value": 338003.04,
+          "weight_pct": 17.79
+        },
+        "TICK_B5BBB3": {
+          "value": 489198.75,
+          "weight_pct": 25.75
+        },
+        "TICK_90531B": {
+          "value": 104.94,
+          "weight_pct": 0.01
+        },
+        "TICK_0258B6": {
+          "value": 106682.66,
+          "weight_pct": 5.62
+        },
+        "TICK_F2AD88": {
+          "value": 106166.94,
+          "weight_pct": 5.59
+        },
+        "TICK_466528": {
+          "value": 106584.5,
+          "weight_pct": 5.61
+        },
+        "TICK_0E60CD": {
+          "value": 106697.97,
+          "weight_pct": 5.62
+        },
+        "TICK_8CA351": {
+          "value": 106661.38,
+          "weight_pct": 5.62
+        },
+        "TICK_4F476A": {
+          "value": 19435.21,
+          "weight_pct": 1.02
+        },
+        "cash": {
+          "value": 0.51,
+          "weight_pct": 0.0
+        }
+      },
+      "concentration": {
+        "num_holdings": 13,
+        "herfindahl_index": 0.1822,
+        "max_position_pct": 26.12,
+        "cash_pct": 0.0,
+        "equity_allocated_pct": 100.0
+      }
+    },
+    {
+      "period": "Period_033",
+      "nav": 2176862.5300000003,
+      "cash": 101479.50999999997,
+      "equity": 2075383.0200000003,
+      "holdings": {
+        "TICK_0A4917": 25,
+        "TICK_831B44": 426,
+        "TICK_48C6EE": 41,
+        "TICK_C20370": 3634,
+        "TICK_A8486B": 2062,
+        "TICK_B5BBB3": 4775,
+        "TICK_90531B": 3,
+        "TICK_F2AD88": 186,
+        "TICK_466528": 550,
+        "TICK_0E60CD": 1503,
+        "TICK_8CA351": 826,
+        "TICK_4F476A": 151
+      },
+      "allocation": {
+        "TICK_0A4917": {
+          "value": 0.0,
+          "weight_pct": 0.0
+        },
+        "TICK_831B44": {
+          "value": 21939.0,
+          "weight_pct": 1.01
+        },
+        "TICK_48C6EE": {
+          "value": 1205.81,
+          "weight_pct": 0.06
+        },
+        "TICK_C20370": {
+          "value": 526384.9,
+          "weight_pct": 24.18
+        },
+        "TICK_A8486B": {
+          "value": 319898.68,
+          "weight_pct": 14.7
+        },
+        "TICK_B5BBB3": {
+          "value": 687122.5,
+          "weight_pct": 31.56
+        },
+        "TICK_90531B": {
+          "value": 113.73,
+          "weight_pct": 0.01
+        },
+        "TICK_F2AD88": {
+          "value": 117462.72,
+          "weight_pct": 5.4
+        },
+        "TICK_466528": {
+          "value": 103658.5,
+          "weight_pct": 4.76
+        },
+        "TICK_0E60CD": {
+          "value": 140004.45,
+          "weight_pct": 6.43
+        },
+        "TICK_8CA351": {
+          "value": 129979.36,
+          "weight_pct": 5.97
+        },
+        "TICK_4F476A": {
+          "value": 27613.37,
+          "weight_pct": 1.27
+        },
+        "cash": {
+          "value": 101479.51,
+          "weight_pct": 4.66
+        }
+      },
+      "concentration": {
+        "num_holdings": 12,
+        "herfindahl_index": 0.1928,
+        "max_position_pct": 31.56,
+        "cash_pct": 4.66,
+        "equity_allocated_pct": 95.34
+      }
+    },
+    {
+      "period": "Period_034",
+      "nav": 1892639.02,
+      "cash": 516627.88,
+      "equity": 1376011.14,
+      "holdings": {
+        "TICK_0A4917": 25,
+        "TICK_831B44": 428,
+        "TICK_48C6EE": 41,
+        "TICK_C20370": 3634,
+        "TICK_A8486B": 2062,
+        "TICK_90531B": 3,
+        "TICK_F2AD88": 186,
+        "TICK_466528": 550,
+        "TICK_0E60CD": 1503,
+        "TICK_8CA351": 826,
+        "TICK_4F476A": 151,
+        "TICK_3C3530": 574
+      },
+      "allocation": {
+        "TICK_0A4917": {
+          "value": 0.0,
+          "weight_pct": 0.0
+        },
+        "TICK_831B44": {
+          "value": 20591.08,
+          "weight_pct": 1.09
+        },
+        "TICK_48C6EE": {
+          "value": 1095.11,
+          "weight_pct": 0.06
+        },
+        "TICK_C20370": {
+          "value": 509305.1,
+          "weight_pct": 26.91
+        },
+        "TICK_A8486B": {
+          "value": 272245.86,
+          "weight_pct": 14.38
+        },
+        "TICK_90531B": {
+          "value": 94.26,
+          "weight_pct": 0.0
+        },
+        "TICK_F2AD88": {
+          "value": 129238.38,
+          "weight_pct": 6.83
+        },
+        "TICK_466528": {
+          "value": 100144.0,
+          "weight_pct": 5.29
+        },
+        "TICK_0E60CD": {
+          "value": 114498.54,
+          "weight_pct": 6.05
+        },
+        "TICK_8CA351": {
+          "value": 105240.66,
+          "weight_pct": 5.56
+        },
+        "TICK_4F476A": {
+          "value": 22195.49,
+          "weight_pct": 1.17
+        },
+        "TICK_3C3530": {
+          "value": 101362.66,
+          "weight_pct": 5.36
+        },
+        "cash": {
+          "value": 516627.88,
+          "weight_pct": 27.3
+        }
+      },
+      "concentration": {
+        "num_holdings": 12,
+        "herfindahl_index": 0.1104,
+        "max_position_pct": 26.91,
+        "cash_pct": 27.3,
+        "equity_allocated_pct": 72.7
+      }
+    },
+    {
+      "period": "Period_035",
+      "nav": 1564970.6400000001,
+      "cash": 0.9300000001094304,
+      "equity": 1564969.71,
+      "holdings": {
+        "TICK_0A4917": 25,
+        "TICK_831B44": 428,
+        "TICK_48C6EE": 41,
+        "TICK_C20370": 3634,
+        "TICK_90531B": 12796,
+        "TICK_F2AD88": 186,
+        "TICK_466528": 550,
+        "TICK_0E60CD": 1503,
+        "TICK_8CA351": 826,
+        "TICK_4F476A": 151,
+        "TICK_3C3530": 574,
+        "TICK_E79D3C": 907
+      },
+      "allocation": {
+        "TICK_0A4917": {
+          "value": 0.0,
+          "weight_pct": 0.0
+        },
+        "TICK_831B44": {
+          "value": 15553.52,
+          "weight_pct": 0.99
+        },
+        "TICK_48C6EE": {
+          "value": 595.32,
+          "weight_pct": 0.04
+        },
+        "TICK_C20370": {
+          "value": 395161.16,
+          "weight_pct": 25.25
+        },
+        "TICK_90531B": {
+          "value": 352401.84,
+          "weight_pct": 22.52
+        },
+        "TICK_F2AD88": {
+          "value": 110744.4,
+          "weight_pct": 7.08
+        },
+        "TICK_466528": {
+          "value": 81697.0,
+          "weight_pct": 5.22
+        },
+        "TICK_0E60CD": {
+          "value": 80635.95,
+          "weight_pct": 5.15
+        },
+        "TICK_8CA351": {
+          "value": 71259.02,
+          "weight_pct": 4.55
+        },
+        "TICK_4F476A": {
+          "value": 18653.03,
+          "weight_pct": 1.19
+        },
+        "TICK_3C3530": {
+          "value": 86071.3,
+          "weight_pct": 5.5
+        },
+        "TICK_E79D3C": {
+          "value": 352197.17,
+          "weight_pct": 22.51
+        },
+        "cash": {
+          "value": 0.93,
+          "weight_pct": 0.0
+        }
+      },
+      "concentration": {
+        "num_holdings": 12,
+        "herfindahl_index": 0.1808,
+        "max_position_pct": 25.25,
+        "cash_pct": 0.0,
+        "equity_allocated_pct": 100.0
+      }
+    },
+    {
+      "period": "Period_036",
+      "nav": 1491961.95,
+      "cash": 437630.0300000001,
+      "equity": 1054331.92,
+      "holdings": {
+        "TICK_0A4917": 25,
+        "TICK_48C6EE": 41,
+        "TICK_C20370": 3634,
+        "TICK_90531B": 12796,
+        "TICK_F2AD88": 186,
+        "TICK_466528": 550,
+        "TICK_8CA351": 826,
+        "TICK_4F476A": 151,
+        "TICK_3C3530": 574
+      },
+      "allocation": {
+        "TICK_0A4917": {
+          "value": 0.0,
+          "weight_pct": 0.0
+        },
+        "TICK_48C6EE": {
+          "value": 497.74,
+          "weight_pct": 0.03
+        },
+        "TICK_C20370": {
+          "value": 347592.1,
+          "weight_pct": 23.3
+        },
+        "TICK_90531B": {
+          "value": 340373.6,
+          "weight_pct": 22.81
+        },
+        "TICK_F2AD88": {
+          "value": 128129.82,
+          "weight_pct": 8.59
+        },
+        "TICK_466528": {
+          "value": 85129.0,
+          "weight_pct": 5.71
+        },
+        "TICK_8CA351": {
+          "value": 67674.18,
+          "weight_pct": 4.54
+        },
+        "TICK_4F476A": {
+          "value": 17059.98,
+          "weight_pct": 1.14
+        },
+        "TICK_3C3530": {
+          "value": 67875.5,
+          "weight_pct": 4.55
+        },
+        "cash": {
+          "value": 437630.03,
+          "weight_pct": 29.33
+        }
+      },
+      "concentration": {
+        "num_holdings": 9,
+        "herfindahl_index": 0.1212,
+        "max_position_pct": 23.3,
+        "cash_pct": 29.33,
+        "equity_allocated_pct": 70.67
+      }
+    },
+    {
+      "period": "Period_037",
+      "nav": 1573701.9,
+      "cash": 103714.56000000017,
+      "equity": 1469987.3399999999,
+      "holdings": {
+        "TICK_0A4917": 25,
+        "TICK_C20370": 3634,
+        "TICK_90531B": 12796,
+        "TICK_F2AD88": 186,
+        "TICK_466528": 550,
+        "TICK_8CA351": 826,
+        "TICK_4F476A": 151,
+        "TICK_15900B": 10412
+      },
+      "allocation": {
+        "TICK_0A4917": {
+          "value": 0.0,
+          "weight_pct": 0.0
+        },
+        "TICK_C20370": {
+          "value": 320627.82,
+          "weight_pct": 20.37
+        },
+        "TICK_90531B": {
+          "value": 389638.2,
+          "weight_pct": 24.76
+        },
+        "TICK_F2AD88": {
+          "value": 134197.14,
+          "weight_pct": 8.53
+        },
+        "TICK_466528": {
+          "value": 90871.0,
+          "weight_pct": 5.77
+        },
+        "TICK_8CA351": {
+          "value": 80435.88,
+          "weight_pct": 5.11
+        },
+        "TICK_4F476A": {
+          "value": 16600.94,
+          "weight_pct": 1.05
+        },
+        "TICK_15900B": {
+          "value": 437616.36,
+          "weight_pct": 27.81
+        },
+        "cash": {
+          "value": 103714.56,
+          "weight_pct": 6.59
+        }
+      },
+      "concentration": {
+        "num_holdings": 8,
+        "herfindahl_index": 0.1935,
+        "max_position_pct": 27.81,
+        "cash_pct": 6.59,
+        "equity_allocated_pct": 93.41
+      }
+    },
+    {
+      "period": "Period_038",
+      "nav": 1889597.3800000006,
+      "cash": 62.44000000015694,
+      "equity": 1889534.9400000004,
+      "holdings": {
+        "TICK_0A4917": 25,
+        "TICK_C20370": 3634,
+        "TICK_90531B": 12796,
+        "TICK_F2AD88": 186,
+        "TICK_466528": 550,
+        "TICK_8CA351": 826,
+        "TICK_4F476A": 151,
+        "TICK_15900B": 10412,
+        "TICK_00BB14": 1400,
+        "TICK_CD1FCC": 2,
+        "TICK_D6DD4C": 34
+      },
+      "allocation": {
+        "TICK_0A4917": {
+          "value": 0.0,
+          "weight_pct": 0.0
+        },
+        "TICK_C20370": {
+          "value": 376954.82,
+          "weight_pct": 19.95
+        },
+        "TICK_90531B": {
+          "value": 481129.6,
+          "weight_pct": 25.46
+        },
+        "TICK_F2AD88": {
+          "value": 152830.62,
+          "weight_pct": 8.09
+        },
+        "TICK_466528": {
+          "value": 102305.5,
+          "weight_pct": 5.41
+        },
+        "TICK_8CA351": {
+          "value": 101457.58,
+          "weight_pct": 5.37
+        },
+        "TICK_4F476A": {
+          "value": 19264.58,
+          "weight_pct": 1.02
+        },
+        "TICK_15900B": {
+          "value": 551940.12,
+          "weight_pct": 29.21
+        },
+        "TICK_00BB14": {
+          "value": 89810.0,
+          "weight_pct": 4.75
+        },
+        "TICK_CD1FCC": {
+          "value": 270.34,
+          "weight_pct": 0.01
+        },
+        "TICK_D6DD4C": {
+          "value": 13571.78,
+          "weight_pct": 0.72
+        },
+        "cash": {
+          "value": 62.44,
+          "weight_pct": 0.0
+        }
+      },
+      "concentration": {
+        "num_holdings": 11,
+        "herfindahl_index": 0.2047,
+        "max_position_pct": 29.21,
+        "cash_pct": 0.0,
+        "equity_allocated_pct": 100.0
+      }
+    },
+    {
+      "period": "Period_039",
+      "nav": 2196151.24,
+      "cash": 452984.98000000016,
+      "equity": 1743166.26,
+      "holdings": {
+        "TICK_0A4917": 25,
+        "TICK_90531B": 12796,
+        "TICK_F2AD88": 186,
+        "TICK_466528": 550,
+        "TICK_8CA351": 826,
+        "TICK_15900B": 10412,
+        "TICK_00BB14": 1400,
+        "TICK_CD1FCC": 2,
+        "TICK_D6DD4C": 34,
+        "TICK_48C6EE": 1
+      },
+      "allocation": {
+        "TICK_0A4917": {
+          "value": 0.0,
+          "weight_pct": 0.0
+        },
+        "TICK_90531B": {
+          "value": 583497.6,
+          "weight_pct": 26.57
+        },
+        "TICK_F2AD88": {
+          "value": 133648.44,
+          "weight_pct": 6.09
+        },
+        "TICK_466528": {
+          "value": 99011.0,
+          "weight_pct": 4.51
+        },
+        "TICK_8CA351": {
+          "value": 119390.04,
+          "weight_pct": 5.44
+        },
+        "TICK_15900B": {
+          "value": 669387.48,
+          "weight_pct": 30.48
+        },
+        "TICK_00BB14": {
+          "value": 121436.0,
+          "weight_pct": 5.53
+        },
+        "TICK_CD1FCC": {
+          "value": 262.72,
+          "weight_pct": 0.01
+        },
+        "TICK_D6DD4C": {
+          "value": 16490.68,
+          "weight_pct": 0.75
+        },
+        "TICK_48C6EE": {
+          "value": 42.3,
+          "weight_pct": 0.0
+        },
+        "cash": {
+          "value": 452984.98,
+          "weight_pct": 20.63
+        }
+      },
+      "concentration": {
+        "num_holdings": 10,
+        "herfindahl_index": 0.1753,
+        "max_position_pct": 30.48,
+        "cash_pct": 20.63,
+        "equity_allocated_pct": 79.37
+      }
+    },
+    {
+      "period": "Period_040",
+      "nav": 2144106.24,
+      "cash": 3.080000000158634,
+      "equity": 2144103.16,
+      "holdings": {
+        "TICK_0A4917": 25,
+        "TICK_90531B": 14796,
+        "TICK_F2AD88": 186,
+        "TICK_8CA351": 826,
+        "TICK_15900B": 10412,
+        "TICK_00BB14": 4400,
+        "TICK_CD1FCC": 2,
+        "TICK_48C6EE": 5001,
+        "TICK_F01743": 59
+      },
+      "allocation": {
+        "TICK_0A4917": {
+          "value": 0.0,
+          "weight_pct": 0.0
+        },
+        "TICK_90531B": {
+          "value": 637559.64,
+          "weight_pct": 29.74
+        },
+        "TICK_F2AD88": {
+          "value": 153070.56,
+          "weight_pct": 7.14
+        },
+        "TICK_8CA351": {
+          "value": 114359.7,
+          "weight_pct": 5.33
+        },
+        "TICK_15900B": {
+          "value": 652624.16,
+          "weight_pct": 30.44
+        },
+        "TICK_00BB14": {
+          "value": 365464.0,
+          "weight_pct": 17.05
+        },
+        "TICK_CD1FCC": {
+          "value": 309.76,
+          "weight_pct": 0.01
+        },
+        "TICK_48C6EE": {
+          "value": 217543.5,
+          "weight_pct": 10.15
+        },
+        "TICK_F01743": {
+          "value": 3171.84,
+          "weight_pct": 0.15
+        },
+        "cash": {
+          "value": 3.08,
+          "weight_pct": 0.0
+        }
+      },
+      "concentration": {
+        "num_holdings": 9,
+        "herfindahl_index": 0.2284,
+        "max_position_pct": 30.44,
+        "cash_pct": 0.0,
+        "equity_allocated_pct": 100.0
+      }
+    },
+    {
+      "period": "End",
+      "nav": 2579879.16,
+      "cash": 3.080000000158634,
+      "equity": 2579876.08,
+      "holdings": {
+        "TICK_0A4917": 25,
+        "TICK_90531B": 14796,
+        "TICK_F2AD88": 186,
+        "TICK_8CA351": 826,
+        "TICK_15900B": 10412,
+        "TICK_00BB14": 4400,
+        "TICK_CD1FCC": 2,
+        "TICK_48C6EE": 5001,
+        "TICK_F01743": 59
+      },
+      "allocation": {
+        "TICK_0A4917": {
+          "value": 0.0,
+          "weight_pct": 0.0
+        },
+        "TICK_90531B": {
+          "value": 725004.0,
+          "weight_pct": 28.1
+        },
+        "TICK_F2AD88": {
+          "value": 163361.94,
+          "weight_pct": 6.33
+        },
+        "TICK_8CA351": {
+          "value": 133869.82,
+          "weight_pct": 5.19
+        },
+        "TICK_15900B": {
+          "value": 815571.96,
+          "weight_pct": 31.61
+        },
+        "TICK_00BB14": {
+          "value": 491128.0,
+          "weight_pct": 19.04
+        },
+        "TICK_CD1FCC": {
+          "value": 310.16,
+          "weight_pct": 0.01
+        },
+        "TICK_48C6EE": {
+          "value": 247649.52,
+          "weight_pct": 9.6
+        },
+        "TICK_F01743": {
+          "value": 2980.68,
+          "weight_pct": 0.12
+        },
+        "cash": {
+          "value": 3.08,
+          "weight_pct": 0.0
+        }
+      },
+      "concentration": {
+        "num_holdings": 9,
+        "herfindahl_index": 0.2311,
+        "max_position_pct": 31.61,
+        "cash_pct": 0.0,
+        "equity_allocated_pct": 100.0
+      }
+    }
+  ]
+}
